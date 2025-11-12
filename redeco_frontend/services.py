@@ -246,23 +246,60 @@ def post_reune_consultas_general(token: str, payload, timeout: int = 15) -> dict
 
     try:
         resp = requests.post(url, headers=headers, json=payload, timeout=timeout)
+    except requests.Timeout:
+        raise RedeCoAPIError(
+            "Timeout al conectar con la API REUNE. El servidor no respondió a tiempo. "
+            "Por favor, intenta nuevamente en unos minutos."
+        )
+    except requests.ConnectionError:
+        raise RedeCoAPIError(
+            "Error de conexión con la API REUNE. Verifica que la URL sea correcta y que el servidor esté disponible. "
+            f"URL intentada: {url}"
+        )
     except requests.RequestException as exc:
-        raise RedeCoAPIError(f"Error connecting to REUNE API: {exc}") from exc
+        raise RedeCoAPIError(f"Error al conectar con la API REUNE: {exc}") from exc
 
-    # Accept 200/201 as success; otherwise, extract error detail if possible
-    if resp.status_code >= 400:
+    # Handle specific HTTP error codes with friendly messages
+    if resp.status_code == 502:
+        raise RedeCoAPIError(
+            "Error 502 Bad Gateway: El servidor REUNE no está disponible temporalmente. "
+            "Esto puede deberse a mantenimiento o problemas del servidor. "
+            "Por favor, intenta nuevamente más tarde o contacta a CONDUSEF para verificar el estado del servicio."
+        )
+    elif resp.status_code == 503:
+        raise RedeCoAPIError(
+            "Error 503 Service Unavailable: El servidor REUNE está temporalmente fuera de servicio. "
+            "Por favor, intenta nuevamente más tarde."
+        )
+    elif resp.status_code == 504:
+        raise RedeCoAPIError(
+            "Error 504 Gateway Timeout: El servidor REUNE tardó demasiado en responder. "
+            "Por favor, intenta nuevamente."
+        )
+    elif resp.status_code == 401:
+        raise RedeCoAPIError(
+            "Error 401 Unauthorized: Token inválido o expirado. "
+            "Genera un nuevo token desde la página principal."
+        )
+    elif resp.status_code == 403:
+        raise RedeCoAPIError(
+            "Error 403 Forbidden: No tienes permisos para acceder a este recurso. "
+            "Verifica que tu token tenga los permisos necesarios."
+        )
+    elif resp.status_code >= 400:
+        # Try to extract detailed error message from response
         try:
             data = resp.json()
         except Exception:
-            raise RedeCoAPIError(f"REUNE API returned {resp.status_code}: {resp.text}")
+            raise RedeCoAPIError(f"API REUNE retornó error {resp.status_code}: {resp.text[:200]}")
 
         # REUNE negative example uses keys: message and errors by folio
         msg = None
         if isinstance(data, dict):
             msg = data.get('message') or data.get('msg') or data.get('detail') or data.get('error')
-        raise RedeCoAPIError(msg or f"REUNE API returned {resp.status_code}")
+        raise RedeCoAPIError(msg or f"API REUNE retornó error {resp.status_code}")
 
     try:
         return resp.json()
     except ValueError:
-        raise RedeCoAPIError("REUNE API did not return JSON")
+        raise RedeCoAPIError("La API REUNE no retornó un JSON válido en la respuesta")
