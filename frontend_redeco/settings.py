@@ -62,6 +62,15 @@ DATABASES = {
     }
 }
 
+# Session configuration - use cache/memory instead of database
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'redeco-cache',
+    }
+}
+
 # Internationalization
 LANGUAGE_CODE = 'es-mx'
 TIME_ZONE = 'UTC'
