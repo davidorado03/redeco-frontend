@@ -1,0 +1,5 @@
+
+Django==4.2.11
+requests==2.31.0
+whitenoise==6.6.0
+gunicorn==21.2.0

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Catálogo de Municipios - REDECO{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Catálogo de Municipios</h2>
+            <hr>
+
+            {% if error %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error:</strong> {{ error }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+
+            <!-- Form to search municipios -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Busca Municipios</h5>
+                    <form method="get" class="row g-3">
+                        <div class="col-md-5">
+                            <label for="estadoSelect" class="form-label">Estado <span class="text-danger">*</span></label>
+                            {% if estados %}
+                            <select class="form-select" id="estadoSelect" name="estado_id" required>
+                                <option value="">-- Selecciona un estado --</option>
+                                {% for estado in estados %}
+                                <option value="{{ estado.claveEdo }}" {% if estado.claveEdo|stringformat:"s" == selected_estado_id %}selected{% endif %}>
+                                    {{ estado.estado }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% else %}
+                            <p class="text-danger">No se pudo cargar la lista de estados</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-5">
+                            <label for="cpInput" class="form-label">Código Postal <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="cpInput" name="cp" placeholder="Ej: 98000" value="{{ codigo_postal }}" required>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Buscar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results table -->
+            {% if data.municipios %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Estado ID</th>
+                            <th>Municipio ID</th>
+                            <th>Municipio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for municipio in data.municipios %}
+                        <tr>
+                            <td>{{ municipio.estadoId }}</td>
+                            <td>{{ municipio.municipioId }}</td>
+                            <td>{{ municipio.municipio }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-muted mt-3">Total de registros: <strong>{{ data.municipios|length }}</strong></p>
+            {% elif selected_estado_id and codigo_postal %}
+            <div class="alert alert-info">
+                No hay municipios disponibles para el estado y código postal seleccionados.
+            </div>
+            {% endif %}
+
+            <a href="{% url 'redeco_frontend:index' %}" class="btn btn-primary mt-3">Volver al inicio</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

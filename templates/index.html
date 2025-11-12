@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row mb-5">
+    <div class="col-lg-8 mx-auto">
+      <!-- Header Section -->
+      <div class="mb-5">
+        <h1 class="display-5 fw-bold mb-2">REDECO Frontend</h1>
+        <p class="lead text-muted">Interfaz de gestión de catálogos y consultas REDECO</p>
+        <hr class="my-4">
+      </div>
+
+      <!-- Authentication Card -->
+      <div class="card shadow-sm mb-5">
+        <div class="card-header">
+          <h5 class="card-title">Autenticación</h5>
+        </div>
+        <div class="card-body">
+          <p class="card-text text-muted mb-4">Completa el formulario para generar un token que te permite acceder a catálogos protegidos.</p>
+
+          <form method="post" class="mb-4">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label fw-bold">Usuario</label>
+              <input type="text" name="username" class="form-control form-control-lg" value="{{ example.username }}" required>
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-bold">Contraseña</label>
+              <input type="password" name="password" class="form-control form-control-lg" value="{{ example.password }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg w-100">Generar Token</button>
+          </form>
+
+          {% if token %}
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <h6 class="alert-heading">Token Generado Exitosamente</h6>
+            <pre class="mb-0 p-3 bg-white rounded" style="font-size: 0.75rem; max-height: 120px; overflow-y: auto; border: 1px solid #dee2e6;">{{ token }}</pre>
+            <small class="text-muted d-block mt-2">El token está guardado en tu sesión.</small>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% elif error %}
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error:</strong> {{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Public Catalogs Section -->
+      <div class="card shadow-sm mb-5">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Catálogos Públicos</h5>
+        </div>
+        <div class="card-body">
+          <p class="text-muted mb-4">Accede a estos catálogos sin necesidad de autenticación.</p>
+          
+          <!-- Two Column Grid for Public Catalogs -->
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="list-group">
+                <a href="{% url 'redeco_frontend:catalogs_medios' %}" class="list-group-item list-group-item-action">
+                  <div class="fw-bold">Medios de Recepción</div>
+                  <small class="text-muted">Catálogo de medios para reportar quejas</small>
+                </a>
+                <a href="{% url 'redeco_frontend:catalogs_niveles_atencion' %}" class="list-group-item list-group-item-action">
+                  <div class="fw-bold">Niveles de Atención</div>
+                  <small class="text-muted">Catálogo de niveles de atención</small>
+                </a>
+                <a href="{% url 'redeco_frontend:catalogs_estados' %}" class="list-group-item list-group-item-action">
+                  <div class="fw-bold">Estados</div>
+                  <small class="text-muted">Estados de la república mexicana</small>
+                </a>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="list-group">
+                <a href="{% url 'redeco_frontend:catalogs_codigos_postales' %}" class="list-group-item list-group-item-action">
+                  <div class="fw-bold">Códigos Postales</div>
+                  <small class="text-muted">Búsqueda por estado</small>
+                </a>
+                <a href="{% url 'redeco_frontend:catalogs_municipios' %}" class="list-group-item list-group-item-action">
+                  <div class="fw-bold">Municipios</div>
+                  <small class="text-muted">Búsqueda por estado y código postal</small>
+                </a>
+                <a href="{% url 'redeco_frontend:catalogs_colonias' %}" class="list-group-item list-group-item-action">
+                  <div class="fw-bold">Colonias</div>
+                  <small class="text-muted">Búsqueda por código postal</small>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Protected Catalogs Section -->
+      {% if token %}
+      <div class="card shadow-sm mb-5">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Catálogos Protegidos</h5>
+        </div>
+        <div class="card-body">
+          <p class="text-muted mb-4">Catálogos disponibles con tu token actual.</p>
+          
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="list-group">
+                <a href="{% url 'redeco_frontend:catalogs_productos' %}" class="list-group-item list-group-item-action">
+                  <div class="fw-bold">Productos</div>
+                  <small class="text-muted">Catálogo de productos disponibles</small>
+                </a>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="list-group">
+                <a href="{% url 'redeco_frontend:catalogs_causas' %}" class="list-group-item list-group-item-action">
+                  <div class="fw-bold">Causas de Quejas</div>
+                  <small class="text-muted">Catálogo de causas para reportar</small>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Footer Info -->
+      <div class="alert alert-info text-center py-3">
+        <small class="text-muted">Sistema de gestión de catálogos REDECO • CONDUSEF 2024</small>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

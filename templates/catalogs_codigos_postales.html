@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Catálogo de Códigos Postales - REDECO{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Catálogo de Códigos Postales</h2>
+            <hr>
+
+            {% if error %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error:</strong> {{ error }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+
+            <!-- Form to select state -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Selecciona un Estado</h5>
+                    <form method="get" class="row g-3">
+                        <div class="col-md-8">
+                            <label for="estadoSelect" class="form-label">Estado <span class="text-danger">*</span></label>
+                            {% if estados %}
+                            <select class="form-select" id="estadoSelect" name="estado_id" required>
+                                <option value="">-- Selecciona un estado --</option>
+                                {% for estado in estados %}
+                                <option value="{{ estado.claveEdo }}" {% if estado.claveEdo|stringformat:"s" == selected_estado_id %}selected{% endif %}>
+                                    {{ estado.estado }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% else %}
+                            <p class="text-danger">No se pudo cargar la lista de estados</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Buscar Códigos Postales</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results table -->
+            {% if data.codigos_postales %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Estado ID</th>
+                            <th>Estado</th>
+                            <th>Código Postal (SEPOMEX)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for codigo in data.codigos_postales %}
+                        <tr>
+                            <td>{{ codigo.estadoId }}</td>
+                            <td>{{ codigo.estado }}</td>
+                            <td>{{ codigo.codigo_sepomex }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-muted mt-3">Total de registros: <strong>{{ data.codigos_postales|length }}</strong></p>
+            {% elif selected_estado_id %}
+            <div class="alert alert-info">
+                No hay códigos postales disponibles para el estado seleccionado.
+            </div>
+            {% endif %}
+
+            <a href="{% url 'redeco_frontend:index' %}" class="btn btn-primary mt-3">Volver al inicio</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

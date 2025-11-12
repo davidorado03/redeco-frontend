@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <h4>Catálogo de Causas</h4>
+    <p>Endpoint protegido: requiere token de autenticación.</p>
+
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    {% if not token %}
+    <div class="alert alert-warning">
+      <strong>No hay token disponible.</strong> 
+      Genera un token desde la <a href="{% url 'redeco_frontend:index' %}">página principal</a>.
+    </div>
+    {% elif data %}
+    <div class="card">
+      <div class="card-header">
+        <strong>Respuesta de la API</strong>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label><strong>Producto:</strong> {{ product }}</label>
+          </div>
+        </div>
+
+        {% if data.causas %}
+        <div class="table-responsive">
+          <table class="table table-striped table-hover">
+            <thead class="table-dark">
+              <tr>
+                <th style="width: 10%;">ID Causa</th>
+                <th style="width: 55%;">Causa</th>
+                <th style="width: 35%;">Institución</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in data.causas %}
+              <tr>
+                <td><code>{{ item.causaId }}</code></td>
+                <td>{{ item.causa }}</td>
+                <td><small>{{ item.institucion }}</small></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <p class="text-muted mt-2"><small>Total de causas: <strong>{{ data.causas|length }}</strong></small></p>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+          <strong>Respuesta de la API:</strong>
+          <pre class="bg-light p-3 mt-2">{{ data|safe }}</pre>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <hr>
+    <a href="{% url 'redeco_frontend:index' %}" class="btn btn-secondary">Volver a inicio</a>
+  </div>
+</div>
+{% endblock %}

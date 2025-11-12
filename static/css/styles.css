@@ -1,0 +1,121 @@
+/* Color Scheme */
+:root {
+  --primary-color: rgb(97, 18, 50);
+  --text-color: rgb(64, 64, 65);
+  --white-text: rgb(255, 255, 255);
+  --bg-color: rgb(255, 255, 255);
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Card Headers */
+.card-header {
+  background-color: var(--primary-color) !important;
+  color: var(--white-text) !important;
+}
+
+.card-header .card-title {
+  color: var(--white-text);
+  margin: 0;
+}
+
+/* Text Colors */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-color);
+}
+
+.lead {
+  color: var(--text-color);
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: #6d1235;
+  border-color: #6d1235;
+}
+
+/* Links */
+a {
+  color: var(--primary-color);
+}
+
+a:hover {
+  color: #6d1235;
+}
+
+/* Form Controls */
+.form-control, .form-select {
+  color: var(--text-color);
+  border-color: #ddd;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(97, 18, 50, 0.25);
+}
+
+/* Cards */
+.card {
+  margin-top: 20px;
+  border: 1px solid #ddd;
+}
+
+.card-body {
+  color: var(--text-color);
+}
+
+/* List Groups */
+.list-group-item {
+  color: var(--text-color);
+}
+
+.list-group-item-action:hover {
+  background-color: #f5f5f5;
+}
+
+/* Alerts */
+.alert-success {
+  background-color: #d4edda;
+  color: var(--text-color);
+  border-color: #c3e6cb;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: var(--text-color);
+  border-color: #f5c6cb;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  color: var(--text-color);
+  border-color: #bee5eb;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  color: var(--text-color);
+  border-color: #ffeaa7;
+}
+
+/* Tables */
+.table {
+  color: var(--text-color);
+}
+
+.table-dark {
+  background-color: var(--primary-color);
+  color: var(--white-text);
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: #f9f9f9;
+}
