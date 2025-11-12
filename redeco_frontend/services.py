@@ -220,3 +220,49 @@ def call_protected_endpoint(path: str, token: str, params: dict = None, timeout:
         return resp.json()
     except ValueError:
         raise RedeCoAPIError("API did not return JSON")
+
+
+def post_reune_consultas_general(token: str, payload, timeout: int = 15) -> dict:
+    """POST to REUNE consultas/general with Authorization header.
+
+    Args:
+        token: JWT token string to place in Authorization header (no Bearer prefix unless required).
+        payload: Python dict/list to send as JSON body (e.g., the envio_3er_trim array).
+        timeout: request timeout seconds.
+
+    Returns:
+        dict: parsed JSON response from REUNE API.
+
+    Raises:
+        RedeCoAPIError: on network errors, HTTP errors, or non-JSON responses.
+    """
+    base = getattr(settings, 'REUNE_API_BASE', 'https://api-reune.condusef.gob.mx')
+    url = f"{base.rstrip('/')}/reune/consultas/general"
+
+    headers = {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+    }
+
+    try:
+        resp = requests.post(url, headers=headers, json=payload, timeout=timeout)
+    except requests.RequestException as exc:
+        raise RedeCoAPIError(f"Error connecting to REUNE API: {exc}") from exc
+
+    # Accept 200/201 as success; otherwise, extract error detail if possible
+    if resp.status_code >= 400:
+        try:
+            data = resp.json()
+        except Exception:
+            raise RedeCoAPIError(f"REUNE API returned {resp.status_code}: {resp.text}")
+
+        # REUNE negative example uses keys: message and errors by folio
+        msg = None
+        if isinstance(data, dict):
+            msg = data.get('message') or data.get('msg') or data.get('detail') or data.get('error')
+        raise RedeCoAPIError(msg or f"REUNE API returned {resp.status_code}")
+
+    try:
+        return resp.json()
+    except ValueError:
+        raise RedeCoAPIError("REUNE API did not return JSON")

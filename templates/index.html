@@ -123,6 +123,23 @@
           </div>
         </div>
       </div>
+
+      <!-- REUNE Section -->
+      <div class="card shadow-sm mb-5 border-primary">
+        <div class="card-header bg-primary text-white">
+          <h5 class="card-title mb-0">Envío a REUNE</h5>
+        </div>
+        <div class="card-body">
+          <p class="text-muted mb-4">Envía consultas al sistema REUNE (requiere token activo).</p>
+          
+          <div class="list-group">
+            <a href="{% url 'redeco_frontend:reune_consultas' %}" class="list-group-item list-group-item-action list-group-item-primary">
+              <div class="fw-bold">Consultas Generales REUNE</div>
+              <small class="text-muted">POST a /reune/consultas/general con array JSON</small>
+            </a>
+          </div>
+        </div>
+      </div>
       {% endif %}
 
       <!-- Footer Info -->

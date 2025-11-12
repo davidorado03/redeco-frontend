@@ -262,3 +262,43 @@ def catalogs_causas(request):
         'error': error,
     }
     return render(request, 'catalogs_causas.html', context)
+
+
+@require_http_methods(['GET', 'POST'])
+def reune_consultas(request):
+    """Submit consultas to REUNE API (POST to /reune/consultas/general)."""
+    import json
+    
+    token = request.session.get('redeco_token')
+    result = None
+    error = None
+    payload_text = ''
+    
+    if request.method == 'POST':
+        if not token:
+            error = 'Token no disponible. Genera un token desde la página principal.'
+        else:
+            payload_text = request.POST.get('payload', '').strip()
+            
+            if not payload_text:
+                error = 'El payload JSON no puede estar vacío.'
+            else:
+                try:
+                    # Parse JSON payload
+                    payload = json.loads(payload_text)
+                except json.JSONDecodeError as e:
+                    error = f'JSON inválido: {str(e)}'
+                else:
+                    try:
+                        # Call REUNE API
+                        result = services.post_reune_consultas_general(token, payload)
+                    except services.RedeCoAPIError as exc:
+                        error = str(exc)
+    
+    context = {
+        'token': token,
+        'result': result,
+        'error': error,
+        'payload_text': payload_text,
+    }
+    return render(request, 'reune_consultas.html', context)

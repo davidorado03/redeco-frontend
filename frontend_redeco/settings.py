@@ -87,3 +87,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # REDECO API configuration (can be overridden with environment variable)
 REDECO_API_BASE = os.environ.get('REDECO_API_BASE', 'https://api.condusef.gob.mx')
+# REUNE API configuration (separate host)
+REUNE_API_BASE = os.environ.get('REUNE_API_BASE', 'https://api-reune.condusef.gob.mx')

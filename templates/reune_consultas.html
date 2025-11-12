@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <h2 class="mb-4">Envío de Consultas REUNE</h2>
+
+    {% if not token %}
+    <div class="alert alert-warning">
+      <strong>Token requerido:</strong> Necesitas generar un token desde la <a href="{% url 'redeco_frontend:index' %}">página principal</a> para usar este endpoint.
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="alert alert-danger">
+      <strong>Error:</strong> {{ error }}
+    </div>
+    {% endif %}
+
+    {% if result %}
+    <div class="alert alert-success">
+      <h5>Respuesta exitosa</h5>
+      <pre class="mb-0" style="white-space: pre-wrap; word-wrap: break-word;">{{ result|safe }}</pre>
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Formulario de Envío</h5>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="payload" class="form-label">Payload JSON (Array de consultas):</label>
+            <textarea 
+              class="form-control font-monospace" 
+              id="payload" 
+              name="payload" 
+              rows="20" 
+              placeholder='[
+  {
+    "InstitucionClave": "Unión de Crédito Integral, S.A. de C.V.",
+    "Sector": "Uniones de crédito",
+    "ConsultasTrim": 3,
+    "NumConsultas": 1,
+    "ConsultasFolio": "250701",
+    ...
+  }
+]'
+              required
+            >{{ payload_text }}</textarea>
+            <div class="form-text">
+              Pega aquí el JSON con el array de consultas. Ejemplo: <code>envio_3er_trim.json</code>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" {% if not token %}disabled{% endif %}>
+            Enviar Consultas
+          </button>
+          <a href="{% url 'redeco_frontend:index' %}" class="btn btn-secondary">
+            Volver al inicio
+          </a>
+        </form>
+      </div>
+    </div>
+
+    {% if result %}
+    <div class="card mt-4">
+      <div class="card-header">
+        <h5 class="mb-0">Detalle de la Respuesta</h5>
+      </div>
+      <div class="card-body">
+        {% if result.message %}
+        <p><strong>Mensaje:</strong> {{ result.message }}</p>
+        {% endif %}
+        
+        {% if result.errors %}
+        <h6 class="text-danger">Errores por folio:</h6>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered">
+            <thead>
+              <tr>
+                <th>Folio</th>
+                <th>Errores</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for folio, errors in result.errors.items %}
+              <tr>
+                <td><strong>{{ folio }}</strong></td>
+                <td>
+                  <ul class="mb-0">
+                    {% for error_msg in errors %}
+                    <li>{{ error_msg }}</li>
+                    {% endfor %}
+                  </ul>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+
+        {% if result|length > 0 and not result.errors %}
+        <div class="alert alert-info">
+          <strong>Campos adicionales en la respuesta:</strong>
+          <ul class="mb-0">
+            {% for key, value in result.items %}
+            {% if key != 'message' %}
+            <li><strong>{{ key }}:</strong> {{ value }}</li>
+            {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
