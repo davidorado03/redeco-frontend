@@ -158,53 +158,7 @@ def call_public_endpoint(path: str, params: dict = None, timeout: int = 10) -> d
         raise RedeCoAPIError("API did not return JSON")
 
 
-def post_consultas_general(token: str, body: list, timeout: int = 15) -> dict:
-    """POST a https://api-reune.condusef.gob.mx/reune/consultas/general con token y body."""
-    url = "https://api-reune.condusef.gob.mx/reune/consultas/general"
-    headers = {
-        'Authorization': token,
-        'Content-Type': 'application/json',
-    }
-    try:
-        resp = requests.post(url, headers=headers, json=body, timeout=timeout)
-    except requests.RequestException as exc:
-        raise RedeCoAPIError(f"Error conectando a REUNE API: {exc}") from exc
-
-    if resp.status_code >= 400:
-        try:
-            data = resp.json()
-        except Exception:
-            raise RedeCoAPIError(f"API REUNE devolvió {resp.status_code}: {resp.text}")
-
-        def _extract_message(d):
-            if not isinstance(d, dict):
-                return None
-            for key in ('message', 'msg', 'detail', 'error'):
-                v = d.get(key)
-                if isinstance(v, str) and v.strip():
-                    return v.strip()
-                if isinstance(v, list) and v:
-                    return '; '.join(str(x) for x in v)
-            for nested_key in ('data', 'errors', 'response'):
-                nested = d.get(nested_key)
-                if isinstance(nested, dict):
-                    m = _extract_message(nested)
-                    if m:
-                        return m
-            for v in d.values():
-                if isinstance(v, str) and v.strip():
-                    return v.strip()
-            return None
-
-        msg = _extract_message(data) or f"API REUNE devolvió {resp.status_code}"
-        raise RedeCoAPIError(msg)
-
-    try:
-        return resp.json()
-    except ValueError:
-        raise RedeCoAPIError("API REUNE no devolvió JSON")
-
-    # ...existing code...
+def call_protected_endpoint(path: str, token: str, params: dict = None, timeout: int = 10) -> dict:
     """Call an authenticated REDECO API endpoint.
 
     Args:
