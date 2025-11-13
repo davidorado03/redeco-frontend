@@ -356,18 +356,39 @@ def create_queja(request):
     This view currently does not submit to the external API — it provides a
     basic form so the UI can display and later be wired to the real endpoint.
     """
+    import json
+
     error = None
     success = None
+    payload_text = ''
+
+    token = request.session.get('redeco_token')
 
     if request.method == 'POST':
-        # Collect basic form fields (keep minimal for now)
-        folio = (request.POST.get('folio') or '').strip()
-        descripcion = (request.POST.get('descripcion') or '').strip()
-
-        if not folio or not descripcion:
-            error = 'Folio y descripción son obligatorios.'
+        if not token:
+            error = 'Token no disponible. Genera un token desde la página principal.'
         else:
-            # Placeholder: in future call services.create_queja(...) or similar
-            success = 'Queja creada (simulada) con folio: {}'.format(folio)
+            payload_text = request.POST.get('payload', '').strip()
+            if not payload_text:
+                error = 'El payload JSON no puede estar vacío.'
+            else:
+                try:
+                    payload = json.loads(payload_text)
+                except json.JSONDecodeError as e:
+                    error = f'JSON inválido: {str(e)}'
+                else:
+                    try:
+                        result = services.create_queja(token, payload)
+                        success = 'Queja enviada correctamente.'
+                        # Optionally include result details
+                        if isinstance(result, dict):
+                            success += f" Respuesta: {result.get('message') or result.get('msg') or result.get('detail') or ''}"
+                    except services.RedeCoAPIError as exc:
+                        error = str(exc)
 
-    return render(request, 'create_queja.html', {'error': error, 'success': success})
+    context = {
+        'error': error,
+        'success': success,
+        'payload_text': payload_text,
+    }
+    return render(request, 'create_queja.html', context)

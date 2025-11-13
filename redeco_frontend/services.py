@@ -303,3 +303,58 @@ def post_reune_consultas_general(token: str, payload, timeout: int = 15) -> dict
         return resp.json()
     except ValueError:
         raise RedeCoAPIError("La API REUNE no retornó un JSON válido en la respuesta")
+
+
+def create_queja(token: str, payload, timeout: int = 20) -> dict:
+    """POST a REDECO /redeco/quejas para crear una queja.
+
+    Args:
+        token: JWT token string to use in Authorization header.
+        payload: dict with the queja data (matching Postman sample).
+        timeout: seconds for request timeout.
+
+    Returns:
+        dict: parsed JSON response from REDECO.
+
+    Raises:
+        RedeCoAPIError on network/API errors.
+    """
+    base = getattr(settings, 'REDECO_API_BASE', 'https://api.condusef.gob.mx')
+    url = f"{base.rstrip('/')}/redeco/quejas"
+
+    headers = {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+    }
+
+    try:
+        resp = requests.post(url, headers=headers, json=payload, timeout=timeout)
+    except requests.Timeout:
+        raise RedeCoAPIError("Timeout al conectar con la API REDECO. Por favor intenta nuevamente más tarde.")
+    except requests.ConnectionError:
+        raise RedeCoAPIError(f"Error de conexión con la API REDECO. URL intentada: {url}")
+    except requests.RequestException as exc:
+        raise RedeCoAPIError(f"Error al conectar con la API REDECO: {exc}") from exc
+
+    if resp.status_code in (200, 201):
+        try:
+            return resp.json()
+        except Exception:
+            return {'status': 'ok', 'code': resp.status_code, 'text': resp.text}
+
+    # Handle common errors with friendly messages
+    if resp.status_code == 401:
+        raise RedeCoAPIError("Error 401 Unauthorized: token inválido o expirado. Genera un nuevo token.")
+    if resp.status_code == 403:
+        raise RedeCoAPIError("Error 403 Forbidden: no tienes permisos para crear quejas.")
+    if resp.status_code >= 400:
+        try:
+            data = resp.json()
+        except Exception:
+            raise RedeCoAPIError(f"API REDECO retornó error {resp.status_code}: {resp.text[:200]}")
+
+        # Try to extract message
+        msg = None
+        if isinstance(data, dict):
+            msg = data.get('message') or data.get('msg') or data.get('detail') or data.get('error')
+        raise RedeCoAPIError(msg or f"API REDECO retornó error {resp.status_code}")
