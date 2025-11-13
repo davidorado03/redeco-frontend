@@ -351,44 +351,139 @@ def reune_consultas(request):
 @require_http_methods(['GET', 'POST'])
 @require_token
 def create_queja(request):
-    """Simple page to create a queja (placeholder form).
+    """Create a queja using a friendly form.
 
-    This view currently does not submit to the external API — it provides a
-    basic form so the UI can display and later be wired to the real endpoint.
+    GET: fetch small public catalogs (medios, niveles, estados) to populate selects.
+    POST: validate form fields, build the payload expected by the REDECO API and
+    call services.create_queja(token, payload).
     """
     import json
+    from datetime import datetime
 
     error = None
     success = None
-    payload_text = ''
+    payload_sent = None
+
+    # Fetch catalogs for the form selects
+    medios = []
+    niveles = []
+    estados = []
+
+    try:
+        med_resp = services.call_public_endpoint('catalogos/medio-recepcion')
+        # response may be a list or dict; attempt to normalize
+        if isinstance(med_resp, dict) and 'medios' in med_resp:
+            medios = med_resp.get('medios') or []
+        elif isinstance(med_resp, list):
+            medios = med_resp
+        else:
+            # try common key fallback
+            medios = med_resp.get('data') if isinstance(med_resp, dict) else medios
+            medios = medios or []
+    except services.RedeCoAPIError:
+        # non-fatal: form still rendered without medios
+        medios = []
+
+    try:
+        niv_resp = services.call_public_endpoint('catalogos/niveles-atencion')
+        if isinstance(niv_resp, dict) and 'niveles' in niv_resp:
+            niveles = niv_resp.get('niveles') or []
+        elif isinstance(niv_resp, list):
+            niveles = niv_resp
+        else:
+            niveles = niv_resp.get('data') if isinstance(niv_resp, dict) else niveles
+            niveles = niveles or []
+    except services.RedeCoAPIError:
+        niveles = []
+
+    try:
+        est_resp = services.call_public_endpoint('sepomex/estados/')
+        estados = est_resp.get('estados') if isinstance(est_resp, dict) else []
+        estados = estados or []
+    except services.RedeCoAPIError:
+        estados = []
 
     token = request.session.get('redeco_token')
 
     if request.method == 'POST':
-        if not token:
+        # Collect form fields
+        folio = (request.POST.get('folio') or '').strip()
+        fecha_recepcion = (request.POST.get('fecha_recepcion') or '').strip()
+        medio_id = (request.POST.get('medio_id') or '').strip()
+        nivel_id = (request.POST.get('nivel_id') or '').strip()
+        producto = (request.POST.get('producto') or '').strip()
+        causas_id = (request.POST.get('causas_id') or '').strip()
+        estado_id = (request.POST.get('estado_id') or '').strip()
+        municipio = (request.POST.get('municipio') or '').strip()
+        colonia = (request.POST.get('colonia') or '').strip()
+        cp = (request.POST.get('cp') or '').strip()
+        tipo_persona = (request.POST.get('tipo_persona') or '').strip()
+        sexo = (request.POST.get('sexo') or '').strip()
+        edad = (request.POST.get('edad') or '').strip()
+        fecha_resolucion = (request.POST.get('fecha_resolucion') or '').strip()
+        fecha_notificacion = (request.POST.get('fecha_notificacion') or '').strip()
+        respuesta = (request.POST.get('respuesta') or '').strip()
+
+        # Basic validation
+        if not folio or not fecha_recepcion:
+            error = 'Folio y fecha de recepción son obligatorios.'
+        elif not token:
             error = 'Token no disponible. Genera un token desde la página principal.'
         else:
-            payload_text = request.POST.get('payload', '').strip()
-            if not payload_text:
-                error = 'El payload JSON no puede estar vacío.'
-            else:
+            # helper to convert html date (YYYY-MM-DD) to dd/mm/YYYY as used in examples
+            def _fmt_date(d):
+                if not d:
+                    return None
                 try:
-                    payload = json.loads(payload_text)
-                except json.JSONDecodeError as e:
-                    error = f'JSON inválido: {str(e)}'
-                else:
-                    try:
-                        result = services.create_queja(token, payload)
-                        success = 'Queja enviada correctamente.'
-                        # Optionally include result details
-                        if isinstance(result, dict):
-                            success += f" Respuesta: {result.get('message') or result.get('msg') or result.get('detail') or ''}"
-                    except services.RedeCoAPIError as exc:
-                        error = str(exc)
+                    # Accept YYYY-MM-DD or already dd/mm/YYYY
+                    if '-' in d:
+                        dt = datetime.strptime(d, '%Y-%m-%d')
+                        return dt.strftime('%d/%m/%Y')
+                    # try parsing dd/mm/YYYY
+                    dt = datetime.strptime(d, '%d/%m/%Y')
+                    return dt.strftime('%d/%m/%Y')
+                except Exception:
+                    return d
+
+            payload = {
+                'QuejasFolio': folio,
+                'QuejasFecRecepcion': _fmt_date(fecha_recepcion),
+                # map optional numeric ids to int when provided
+                'MedioId': int(medio_id) if medio_id.isdigit() else medio_id or None,
+                'NivelATId': int(nivel_id) if nivel_id.isdigit() else nivel_id or None,
+                'Producto': producto or None,
+                'CausasId': int(causas_id) if causas_id.isdigit() else causas_id or None,
+                'EstadosId': int(estado_id) if estado_id.isdigit() else estado_id or None,
+                'QuejasMunId': municipio or None,
+                'QuejasColId': colonia or None,
+                'QuejasCP': cp or None,
+                'QuejasTipoPersona': tipo_persona or None,
+                'QuejasSexo': sexo or None,
+                'QuejasEdad': int(edad) if edad.isdigit() else (edad or None),
+                'QuejasFecResolucion': _fmt_date(fecha_resolucion),
+                'QuejasFecNotificacion': _fmt_date(fecha_notificacion),
+                'QuejasRespuesta': respuesta or None,
+            }
+
+            # Remove keys with value None to keep payload compact
+            payload = {k: v for k, v in payload.items() if v is not None}
+
+            try:
+                result = services.create_queja(token, payload)
+            except services.RedeCoAPIError as exc:
+                error = str(exc)
+                payload_sent = json.dumps(payload, ensure_ascii=False, indent=2)
+            else:
+                success = 'Queja enviada correctamente.'
+                payload_sent = json.dumps(payload, ensure_ascii=False, indent=2)
 
     context = {
         'error': error,
         'success': success,
-        'payload_text': payload_text,
+        'medios': medios,
+        'niveles': niveles,
+        'estados': estados,
+        'payload_text': payload_sent,
     }
+
     return render(request, 'create_queja.html', context)
