@@ -346,3 +346,28 @@ def reune_consultas(request):
         'payload_text': payload_text,
     }
     return render(request, 'reune_consultas.html', context)
+
+
+@require_http_methods(['GET', 'POST'])
+@require_token
+def create_queja(request):
+    """Simple page to create a queja (placeholder form).
+
+    This view currently does not submit to the external API — it provides a
+    basic form so the UI can display and later be wired to the real endpoint.
+    """
+    error = None
+    success = None
+
+    if request.method == 'POST':
+        # Collect basic form fields (keep minimal for now)
+        folio = (request.POST.get('folio') or '').strip()
+        descripcion = (request.POST.get('descripcion') or '').strip()
+
+        if not folio or not descripcion:
+            error = 'Folio y descripción son obligatorios.'
+        else:
+            # Placeholder: in future call services.create_queja(...) or similar
+            success = 'Queja creada (simulada) con folio: {}'.format(folio)
+
+    return render(request, 'create_queja.html', {'error': error, 'success': success})
