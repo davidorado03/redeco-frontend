@@ -1,6 +1,6 @@
 /* Color Scheme */
 :root {
-  --primary-color: rgb(97, 18, 50);
+  --primary-color: rgb(41, 109, 193);
   --text-color: rgb(64, 64, 65);
   --white-text: rgb(255, 255, 255);
   --bg-color: rgb(255, 255, 255);
@@ -38,8 +38,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary:hover {
-  background-color: #6d1235;
-  border-color: #6d1235;
+  background-color: #296dc1;
+  border-color: #296dc1;
 }
 
 /* Links */
@@ -48,7 +48,7 @@ a {
 }
 
 a:hover {
-  color: #6d1235;
+  color: #296dc1;
 }
 
 /* Form Controls */
@@ -59,7 +59,7 @@ a:hover {
 
 .form-control:focus, .form-select:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.2rem rgba(97, 18, 50, 0.25);
+  box-shadow: 0 0 0 0.2rem rgba(41, 109, 193, 0.25);
 }
 
 /* Cards */

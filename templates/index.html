@@ -24,8 +24,7 @@
           <div class="card-body">
             <p class="card-text text-muted mb-3">Estás autenticado. Puedes acceder a los catálogos y al envío a REUNE.</p>
 
-            <div class="d-flex align-items-start gap-3">
-              <pre class="mb-0 p-3 bg-white rounded" style="font-size: 0.75rem; max-height: 120px; overflow-y: auto; border: 1px solid #dee2e6;">{{ token }}</pre>
+            <div class="d-flex align-items-center gap-3">
               <form method="post" action="{% url 'redeco_frontend:logout' %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-danger">Cerrar sesión</button>
