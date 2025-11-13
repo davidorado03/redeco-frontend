@@ -23,47 +23,49 @@ def require_token(view_func):
     return _wrapped
 
 
-@require_http_methods(['GET', 'POST'])
+@require_http_methods(['GET'])
+@require_token
 def index(request):
-    """Render the landing page / demo frontend view and handle token retrieval."""
+    """Dashboard page shown after login. Index is protected and requires token."""
+    token = request.session.get('redeco_token')
+    # simple context: token present
+    return render(request, 'index.html', {'token': token})
+
+
+@require_http_methods(['GET', 'POST'])
+def login_view(request):
+    """Dedicated login page to obtain and store REDECO token in session."""
     example = {
         'username': 'UCISA',
         'password': 'Ucisa.condusef.api_24',
     }
 
-    token = request.session.get('redeco_token')
     error = None
-    # If a previous redirect stored a login-required message, show it once
     login_msg = request.session.pop('login_required_message', None)
 
     if request.method == 'POST':
         username = (request.POST.get('username') or '').strip()
         password = (request.POST.get('password') or '').strip()
 
-        # validate required fields
         if not username or not password:
             error = 'Usuario y contraseña son obligatorios.'
-            token = None
         else:
             try:
                 token = services.get_token(username, password)
-                # Save token in session for later requests
+                # Save token and redirect to index
                 request.session['redeco_token'] = token
+                return redirect('redeco_frontend:index')
             except services.RedeCoAPIError as exc:
-                # show only concise message extracted from API
                 error = str(exc)
-                token = None
 
-    return render(
-        request,
-        'index.html',
-        {
-            'example': example,
-            'token': token,
-            'error': error,
-            'login_msg': login_msg,
-        },
-    )
+    return render(request, 'login.html', {'example': example, 'error': error, 'login_msg': login_msg})
+
+
+@require_http_methods(['POST'])
+def logout_view(request):
+    """Logout: remove token from session and redirect to login."""
+    request.session.pop('redeco_token', None)
+    return redirect('redeco_frontend:login')
 
 
 @require_http_methods(['GET'])

@@ -17,41 +17,22 @@
       </div>
 
       <!-- Authentication Card -->
-      <div class="card shadow-sm mb-5">
-        <div class="card-header">
-          <h5 class="card-title">Autenticación</h5>
-        </div>
-        <div class="card-body">
-          <p class="card-text text-muted mb-4">Completa el formulario para generar un token que te permite acceder a catálogos protegidos.</p>
-
-          <form method="post" class="mb-4">
-            {% csrf_token %}
-            <div class="mb-3">
-              <label class="form-label fw-bold">Usuario</label>
-              <input type="text" name="username" class="form-control form-control-lg" value="{{ example.username }}" required>
-            </div>
-            <div class="mb-4">
-              <label class="form-label fw-bold">Contraseña</label>
-              <input type="password" name="password" class="form-control form-control-lg" value="{{ example.password }}" required>
-            </div>
-            <button type="submit" class="btn btn-primary btn-lg w-100">Generar Token</button>
-          </form>
-
-          {% if token %}
-          <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <h6 class="alert-heading">Token Generado Exitosamente</h6>
-            <pre class="mb-0 p-3 bg-white rounded" style="font-size: 0.75rem; max-height: 120px; overflow-y: auto; border: 1px solid #dee2e6;">{{ token }}</pre>
-            <small class="text-muted d-block mt-2">El token está guardado en tu sesión.</small>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="card shadow-sm mb-5">
+          <div class="card-header">
+            <h5 class="card-title">Sesión</h5>
           </div>
-          {% elif error %}
-          <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>Error:</strong> {{ error }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <div class="card-body">
+            <p class="card-text text-muted mb-3">Estás autenticado. Puedes acceder a los catálogos y al envío a REUNE.</p>
+
+            <div class="d-flex align-items-start gap-3">
+              <pre class="mb-0 p-3 bg-white rounded" style="font-size: 0.75rem; max-height: 120px; overflow-y: auto; border: 1px solid #dee2e6;">{{ token }}</pre>
+              <form method="post" action="{% url 'redeco_frontend:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger">Cerrar sesión</button>
+              </form>
+            </div>
           </div>
-          {% endif %}
         </div>
-      </div>
 
       <!-- Public Catalogs Section -->
       <div class="card shadow-sm mb-5">
