@@ -14,10 +14,13 @@ def require_token(view_func):
     def _wrapped(request, *args, **kwargs):
         token = request.session.get('redeco_token')
         if not token:
+            # Save a message to show on the login page and redirect there.
+            # Previously this redirected to `index` which is now the protected
+            # dashboard; that caused a redirect loop when index required a token.
             request.session['login_required_message'] = (
                 'Debes iniciar sesión antes de acceder a esta página.'
             )
-            return redirect('redeco_frontend:index')
+            return redirect('redeco_frontend:login')
         return view_func(request, *args, **kwargs)
 
     return _wrapped
