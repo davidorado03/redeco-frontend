@@ -1,6 +1,26 @@
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
+from functools import wraps
 from . import services
+
+
+def require_token(view_func):
+    """Decorator to require a saved redeco_token in session.
+
+    If token not present, redirect to index (login page) and store a
+    short message in session to show to the user.
+    """
+    @wraps(view_func)
+    def _wrapped(request, *args, **kwargs):
+        token = request.session.get('redeco_token')
+        if not token:
+            request.session['login_required_message'] = (
+                'Debes iniciar sesión antes de acceder a esta página.'
+            )
+            return redirect('redeco_frontend:index')
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped
 
 
 @require_http_methods(['GET', 'POST'])
@@ -13,6 +33,8 @@ def index(request):
 
     token = request.session.get('redeco_token')
     error = None
+    # If a previous redirect stored a login-required message, show it once
+    login_msg = request.session.pop('login_required_message', None)
 
     if request.method == 'POST':
         username = (request.POST.get('username') or '').strip()
@@ -32,10 +54,20 @@ def index(request):
                 error = str(exc)
                 token = None
 
-    return render(request, 'index.html', {'example': example, 'token': token, 'error': error})
+    return render(
+        request,
+        'index.html',
+        {
+            'example': example,
+            'token': token,
+            'error': error,
+            'login_msg': login_msg,
+        },
+    )
 
 
 @require_http_methods(['GET'])
+@require_token
 def catalogs_medios(request):
     """Fetch and display medios de recepción catalog (public endpoint, no token required)."""
     data = None
@@ -57,6 +89,7 @@ def catalogs_medios(request):
 
 
 @require_http_methods(['GET'])
+@require_token
 def catalogs_niveles_atencion(request):
     """Fetch and display niveles de atención catalog (public endpoint, no token required)."""
     data = None
@@ -78,6 +111,7 @@ def catalogs_niveles_atencion(request):
 
 
 @require_http_methods(['GET'])
+@require_token
 def catalogs_estados(request):
     """Fetch and display estados catalog (public endpoint, no token required)."""
     data = None
@@ -99,6 +133,7 @@ def catalogs_estados(request):
 
 
 @require_http_methods(['GET'])
+@require_token
 def catalogs_codigos_postales(request):
     """Fetch and display códigos postales catalog (public endpoint, requires estado_id parameter)."""
     data = None
@@ -135,6 +170,7 @@ def catalogs_codigos_postales(request):
 
 
 @require_http_methods(['GET'])
+@require_token
 def catalogs_municipios(request):
     """Fetch and display municipios catalog (public endpoint, requires estado_id and cp parameters)."""
     data = None
@@ -173,6 +209,7 @@ def catalogs_municipios(request):
 
 
 @require_http_methods(['GET'])
+@require_token
 def catalogs_colonias(request):
     """Fetch and display colonias catalog (public endpoint, requires cp parameter)."""
     data = None
@@ -200,6 +237,7 @@ def catalogs_colonias(request):
 
 
 @require_http_methods(['GET'])
+@require_token
 def catalogs_productos(request):
     """Fetch and display productos catalog (protected endpoint requiring token)."""
     token = request.session.get('redeco_token')
@@ -233,6 +271,7 @@ def catalogs_productos(request):
 
 
 @require_http_methods(['GET'])
+@require_token
 def catalogs_causas(request):
     """Fetch and display causas catalog (protected endpoint requiring token)."""
     token = request.session.get('redeco_token')

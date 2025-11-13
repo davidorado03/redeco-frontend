@@ -9,6 +9,11 @@
         <h1 class="display-5 fw-bold mb-2">REDECO Frontend</h1>
         <p class="lead text-muted">Interfaz de gestión de catálogos y consultas REDECO</p>
         <hr class="my-4">
+        {% if login_msg %}
+        <div class="alert alert-warning" role="alert">
+          {{ login_msg }}
+        </div>
+        {% endif %}
       </div>
 
       <!-- Authentication Card -->
