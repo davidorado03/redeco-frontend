@@ -120,9 +120,10 @@
 							<small class="form-text text-muted">1=Pendiente, 2=Concluido</small>
 						</div>
 
-						<div class="col-md-4 mb-3">
+						<!-- DATOS GEOGRÁFICOS REQUERIDOS -->
+						<div class="col-md-3 mb-3">
 							<label class="form-label">Entidad Federativa <span class="text-danger">*</span></label>
-							<select name="estado_id" class="form-control" required>
+							<select id="estado_id_geo" name="estado_id" class="form-control" required>
 								<option value="">-- Seleccione --</option>
 								{% for e in estados %}
 									{% if e.id %}
@@ -132,32 +133,37 @@
 									{% endif %}
 								{% endfor %}
 							</select>
-							<small class="form-text text-muted">Ver catálogo de estados</small>
-						</div>
-
-						<!-- DATOS GEOGRÁFICOS REQUERIDOS -->
-						<div class="col-md-3 mb-3">
-							<label class="form-label">Municipio <span class="text-danger">*</span></label>
-							<input name="municipio" class="form-control" maxlength="8" required />
-							<small class="form-text text-muted">Clave del municipio (máx. 8 dígitos)</small>
-						</div>
-
-						<div class="col-md-3 mb-3">
-							<label class="form-label">Localidad</label>
-							<input name="localidad" class="form-control" maxlength="8" />
-							<small class="form-text text-muted">Opcional (máx. 8 dígitos)</small>
-						</div>
-
-						<div class="col-md-3 mb-3">
-							<label class="form-label">Colonia <span class="text-danger">*</span></label>
-							<input name="colonia" class="form-control" maxlength="8" required />
-							<small class="form-text text-muted">Clave de colonia (máx. 8 dígitos)</small>
+							<small class="form-text text-muted">Seleccione primero el estado</small>
 						</div>
 
 						<div class="col-md-3 mb-3">
 							<label class="form-label">Código Postal <span class="text-danger">*</span></label>
-							<input name="cp" class="form-control" maxlength="10" required />
-							<small class="form-text text-muted">Requerido (máx. 10 caracteres)</small>
+							<select id="cp_select" name="cp" class="form-control" required disabled>
+								<option value="">-- Primero seleccione estado --</option>
+							</select>
+							<small class="form-text text-muted">Carga según el estado seleccionado</small>
+						</div>
+
+						<div class="col-md-3 mb-3">
+							<label class="form-label">Municipio <span class="text-danger">*</span></label>
+							<select id="municipio_select" name="municipio" class="form-control" required disabled>
+								<option value="">-- Primero seleccione CP --</option>
+							</select>
+							<small class="form-text text-muted">Carga según estado y CP</small>
+						</div>
+
+						<div class="col-md-3 mb-3">
+							<label class="form-label">Colonia <span class="text-danger">*</span></label>
+							<select id="colonia_select" name="colonia" class="form-control" required disabled>
+								<option value="">-- Primero seleccione CP --</option>
+							</select>
+							<small class="form-text text-muted">Carga según CP</small>
+						</div>
+
+						<div class="col-md-12 mb-3">
+							<label class="form-label">Localidad</label>
+							<input name="localidad" class="form-control" maxlength="8" />
+							<small class="form-text text-muted">Opcional (máx. 8 dígitos)</small>
 						</div>
 
 						<!-- DATOS DEL USUARIO -->
@@ -246,4 +252,132 @@
 		</div>
 	</div>
 </div>
+
+<script>
+(function() {
+	const API_BASE = 'https://api.condusef.gob.mx';
+	
+	const estadoSelect = document.getElementById('estado_id_geo');
+	const cpSelect = document.getElementById('cp_select');
+	const municipioSelect = document.getElementById('municipio_select');
+	const coloniaSelect = document.getElementById('colonia_select');
+
+	// Cargar códigos postales cuando se selecciona un estado
+	estadoSelect.addEventListener('change', async function() {
+		const estadoId = this.value;
+		
+		// Reset dependientes
+		cpSelect.innerHTML = '<option value="">-- Cargando... --</option>';
+		cpSelect.disabled = true;
+		municipioSelect.innerHTML = '<option value="">-- Primero seleccione CP --</option>';
+		municipioSelect.disabled = true;
+		coloniaSelect.innerHTML = '<option value="">-- Primero seleccione CP --</option>';
+		coloniaSelect.disabled = true;
+
+		if (!estadoId) {
+			cpSelect.innerHTML = '<option value="">-- Primero seleccione estado --</option>';
+			return;
+		}
+
+		try {
+			const response = await fetch(`${API_BASE}/sepomex/codigos-postales/?estado_id=${estadoId}`);
+			if (!response.ok) throw new Error('Error al cargar códigos postales');
+			
+			const data = await response.json();
+			cpSelect.innerHTML = '<option value="">-- Seleccione CP --</option>';
+			
+			// Extraer códigos postales únicos del response
+			let cps = [];
+			if (data.codigos_postales && Array.isArray(data.codigos_postales)) {
+				cps = [...new Set(data.codigos_postales.map(item => item.cp || item.codigo_postal || item))];
+			} else if (Array.isArray(data)) {
+				cps = [...new Set(data.map(item => item.cp || item.codigo_postal || item))];
+			}
+			
+			cps.sort().forEach(cp => {
+				const option = document.createElement('option');
+				option.value = cp;
+				option.textContent = cp;
+				cpSelect.appendChild(option);
+			});
+			
+			cpSelect.disabled = false;
+		} catch (error) {
+			console.error('Error cargando códigos postales:', error);
+			cpSelect.innerHTML = '<option value="">Error al cargar CPs</option>';
+		}
+	});
+
+	// Cargar municipios y colonias cuando se selecciona un CP
+	cpSelect.addEventListener('change', async function() {
+		const cp = this.value;
+		const estadoId = estadoSelect.value;
+
+		// Reset dependientes
+		municipioSelect.innerHTML = '<option value="">-- Cargando... --</option>';
+		municipioSelect.disabled = true;
+		coloniaSelect.innerHTML = '<option value="">-- Cargando... --</option>';
+		coloniaSelect.disabled = true;
+
+		if (!cp || !estadoId) return;
+
+		// Cargar municipios
+		try {
+			const response = await fetch(`${API_BASE}/sepomex/municipios/?estado_id=${estadoId}&cp=${cp}`);
+			if (!response.ok) throw new Error('Error al cargar municipios');
+			
+			const data = await response.json();
+			municipioSelect.innerHTML = '<option value="">-- Seleccione Municipio --</option>';
+			
+			let municipios = [];
+			if (data.municipios && Array.isArray(data.municipios)) {
+				municipios = data.municipios;
+			} else if (Array.isArray(data)) {
+				municipios = data;
+			}
+			
+			municipios.forEach(mun => {
+				const option = document.createElement('option');
+				option.value = mun.id || mun.clave || mun.municipio_id;
+				option.textContent = mun.nombre || mun.municipio || mun.name;
+				municipioSelect.appendChild(option);
+			});
+			
+			municipioSelect.disabled = false;
+		} catch (error) {
+			console.error('Error cargando municipios:', error);
+			municipioSelect.innerHTML = '<option value="">Error al cargar municipios</option>';
+		}
+
+		// Cargar colonias
+		try {
+			const response = await fetch(`${API_BASE}/sepomex/colonias/?cp=${cp}`);
+			if (!response.ok) throw new Error('Error al cargar colonias');
+			
+			const data = await response.json();
+			coloniaSelect.innerHTML = '<option value="">-- Seleccione Colonia --</option>';
+			
+			let colonias = [];
+			if (data.colonias && Array.isArray(data.colonias)) {
+				colonias = data.colonias;
+			} else if (Array.isArray(data)) {
+				colonias = data;
+			}
+			
+			colonias.forEach(col => {
+				const option = document.createElement('option');
+				option.value = col.id || col.clave || col.colonia_id;
+				option.textContent = col.nombre || col.colonia || col.name;
+				coloniaSelect.appendChild(option);
+			});
+			
+			coloniaSelect.disabled = false;
+		} catch (error) {
+			console.error('Error cargando colonias:', error);
+			coloniaSelect.innerHTML = '<option value="">Error al cargar colonias</option>';
+		}
+	});
+})();
+</script>
+
 {% endblock %}
