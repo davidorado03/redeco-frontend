@@ -81,7 +81,29 @@ def catalogs_medios(request):
     try:
         # Call the public endpoint
         response = services.call_public_endpoint('catalogos/medio-recepcion')
-        data = response
+        # Normalizar posibles estructuras
+        medios_list = []
+        if isinstance(response, dict):
+            # Claves comunes observadas
+            for key in ('medio', 'medios', 'mediosRecepcion', 'mediosDeRecepcion'):
+                val = response.get(key)
+                if isinstance(val, list) and val:
+                    medios_list = val
+                    break
+            # A veces viene anidado en 'data'
+            if not medios_list and isinstance(response.get('data'), dict):
+                nested = response.get('data')
+                for key in ('medio', 'medios', 'mediosRecepcion', 'mediosDeRecepcion'):
+                    val = nested.get(key)
+                    if isinstance(val, list) and val:
+                        medios_list = val
+                        break
+            if not medios_list and isinstance(response.get('data'), list):
+                medios_list = response.get('data')
+        elif isinstance(response, list):
+            medios_list = response
+
+        data = {'medio': medios_list} if medios_list else response
     except services.RedeCoAPIError as exc:
         error = str(exc)
 
@@ -371,28 +393,48 @@ def create_queja(request):
 
     try:
         med_resp = services.call_public_endpoint('catalogos/medio-recepcion')
-        # response may be a list or dict; attempt to normalize
-        if isinstance(med_resp, dict) and 'medios' in med_resp:
-            medios = med_resp.get('medios') or []
+        # Normalización ampliada de posibles claves
+        if isinstance(med_resp, dict):
+            for key in ('medios', 'medio', 'mediosRecepcion', 'mediosDeRecepcion'):
+                val = med_resp.get(key)
+                if isinstance(val, list) and val:
+                    medios = val
+                    break
+            if not medios and isinstance(med_resp.get('data'), dict):
+                nested = med_resp.get('data')
+                for key in ('medios', 'medio', 'mediosRecepcion', 'mediosDeRecepcion'):
+                    val = nested.get(key)
+                    if isinstance(val, list) and val:
+                        medios = val
+                        break
+            if not medios and isinstance(med_resp.get('data'), list):
+                medios = med_resp.get('data')
         elif isinstance(med_resp, list):
             medios = med_resp
-        else:
-            # try common key fallback
-            medios = med_resp.get('data') if isinstance(med_resp, dict) else medios
-            medios = medios or []
+        medios = medios or []
     except services.RedeCoAPIError:
         # non-fatal: form still rendered without medios
         medios = []
 
     try:
         niv_resp = services.call_public_endpoint('catalogos/niveles-atencion')
-        if isinstance(niv_resp, dict) and 'niveles' in niv_resp:
-            niveles = niv_resp.get('niveles') or []
+        if isinstance(niv_resp, dict):
+            if 'niveles' in niv_resp:
+                niveles = niv_resp.get('niveles') or []
+            elif 'nivelesDeAtencion' in niv_resp:
+                niveles = niv_resp.get('nivelesDeAtencion') or []
+            else:
+                data_section = niv_resp.get('data')
+                if isinstance(data_section, dict):
+                    if 'niveles' in data_section:
+                        niveles = data_section.get('niveles') or []
+                    elif 'nivelesDeAtencion' in data_section:
+                        niveles = data_section.get('nivelesDeAtencion') or []
+                elif isinstance(data_section, list):
+                    niveles = data_section
         elif isinstance(niv_resp, list):
             niveles = niv_resp
-        else:
-            niveles = niv_resp.get('data') if isinstance(niv_resp, dict) else niveles
-            niveles = niveles or []
+        niveles = niveles or []
     except services.RedeCoAPIError:
         niveles = []
 
