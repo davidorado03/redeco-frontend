@@ -280,8 +280,27 @@ def catalogs_productos(request):
                 'catalogos/products-list',
                 token
             )
-            data = response
-            # Store raw JSON for the modal
+            # Normalizar respuesta de productos
+            productos = []
+            if isinstance(response, dict):
+                for key in ('products', 'productos', 'productsList', 'listaProductos'):
+                    val = response.get(key)
+                    if isinstance(val, list) and val:
+                        productos = val
+                        break
+                if not productos and isinstance(response.get('data'), dict):
+                    nested = response.get('data')
+                    for key in ('products', 'productos', 'productsList', 'listaProductos'):
+                        val = nested.get(key)
+                        if isinstance(val, list) and val:
+                            productos = val
+                            break
+                if not productos and isinstance(response.get('data'), list):
+                    productos = response.get('data')
+            elif isinstance(response, list):
+                productos = response
+            productos = productos or []
+            data = {'products': productos} if productos else response
             import json
             raw_response = json.dumps(response, indent=2, ensure_ascii=False)
         except services.RedeCoAPIError as exc:
@@ -310,14 +329,31 @@ def catalogs_causas(request):
         error = 'Token no disponible. Genera un token desde la página principal.'
     else:
         try:
-            # Call the protected endpoint
-            # Note: URL in Postman has duplication in path, but we'll use the clean path
             response = services.call_protected_endpoint(
                 'catalogos/causas-list/',
                 token,
                 params={'product': product}
             )
-            data = response
+            causas = []
+            if isinstance(response, dict):
+                for key in ('causas', 'causasList', 'listaCausas'):
+                    val = response.get(key)
+                    if isinstance(val, list) and val:
+                        causas = val
+                        break
+                if not causas and isinstance(response.get('data'), dict):
+                    nested = response.get('data')
+                    for key in ('causas', 'causasList', 'listaCausas'):
+                        val = nested.get(key)
+                        if isinstance(val, list) and val:
+                            causas = val
+                            break
+                if not causas and isinstance(response.get('data'), list):
+                    causas = response.get('data')
+            elif isinstance(response, list):
+                causas = response
+            causas = causas or []
+            data = {'causas': causas} if causas else response
         except services.RedeCoAPIError as exc:
             error = str(exc)
 

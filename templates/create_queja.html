@@ -90,14 +90,25 @@
 
 						<div class="col-md-6 mb-3">
 							<label class="form-label">Producto (product) <span class="text-danger">*</span></label>
-							<input name="producto" class="form-control" maxlength="12" required />
-							<small class="form-text text-muted">Código de producto (máx. 12 caracteres)</small>
+							<select id="producto_select" name="producto" class="form-control" required>
+								<option value="">-- Seleccione --</option>
+								{% for p in productos %}
+									{% if p.productId %}
+									<option value="{{ p.productId }}">{{ p.product }}{% if p.institucion %} ({{ p.institucion }}){% endif %}</option>
+									{% else %}
+									<option value="{{ p }}">{{ p }}</option>
+									{% endif %}
+								{% endfor %}
+							</select>
+							<small class="form-text text-muted">Selecciona un producto del catálogo protegido</small>
 						</div>
 
 						<div class="col-md-6 mb-3">
 							<label class="form-label">Causa (CausasId) <span class="text-danger">*</span></label>
-							<input name="causas_id" class="form-control" maxlength="4" required />
-							<small class="form-text text-muted">Clave de causa (máx. 4 caracteres)</small>
+							<select id="causas_select" name="causas_id" class="form-control" required>
+								<option value="">-- Seleccione un producto primero --</option>
+							</select>
+							<small class="form-text text-muted">Se cargan dinámicamente según el producto</small>
 						</div>
 
 						<div class="col-md-4 mb-3">
@@ -163,7 +174,10 @@
 						<div class="col-md-12 mb-3">
 							<label class="form-label">Localidad</label>
 							<input name="localidad" class="form-control" maxlength="8" />
-							<small class="form-text text-muted">Opcional (máx. 8 dígitos)</small>
+								<option value="">-- Seleccione un producto primero --</option>
+							</select>
+							<small class="form-text text-muted">Se cargan dinámicamente según el producto</small>
+						</div>
 						</div>
 
 						<!-- DATOS DEL USUARIO -->
@@ -298,6 +312,45 @@
 				const option = document.createElement('option');
 				option.value = cp;
 				option.textContent = cp;
+									// === CAUSAS dinámicas según producto seleccionado ===
+									const productoSelect = document.getElementById('producto_select');
+									const causasSelect = document.getElementById('causas_select');
+
+									async function fetchCausas(productCode) {
+										if (!productCode) {
+											causasSelect.innerHTML = '<option value="">-- Seleccione un producto primero --</option>';
+											return;
+										}
+										causasSelect.innerHTML = '<option value="">Cargando causas...</option>';
+										try {
+											const resp = await fetch(`/catalogos/causas/?product=${encodeURIComponent(productCode)}`, {headers: {'X-Requested-With': 'XMLHttpRequest'}});
+											if (!resp.ok) throw new Error('HTTP ' + resp.status);
+											let data;
+											try { data = await resp.json(); } catch { data = {}; }
+											let causas = [];
+											if (data.causas) causas = data.causas;
+											else if (data.data && data.data.causas) causas = data.data.causas;
+											causasSelect.innerHTML = '<option value="">-- Seleccione --</option>';
+											for (const c of causas) {
+												if (c.causaId) {
+													const opt = document.createElement('option');
+													opt.value = c.causaId;
+													opt.textContent = `${c.causa || c.descripcion || c.name} (${c.causaId})`;
+													causasSelect.appendChild(opt);
+												}
+											}
+											if (causas.length === 0) {
+												causasSelect.innerHTML = '<option value="">Sin causas para este producto</option>';
+											}
+										} catch (e) {
+											console.error('Error cargando causas', e);
+											causasSelect.innerHTML = '<option value="">Error al cargar causas</option>';
+										}
+									}
+
+									productoSelect?.addEventListener('change', (e) => {
+										fetchCausas(e.target.value);
+									});
 				cpSelect.appendChild(option);
 			});
 			
