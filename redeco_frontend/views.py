@@ -406,15 +406,20 @@ def create_queja(request):
     token = request.session.get('redeco_token')
 
     if request.method == 'POST':
-        # Collect form fields
+        # Collect all form fields per REDECO spec
+        no_trim = (request.POST.get('no_trim') or '').strip()
+        quejas_num = (request.POST.get('quejas_num') or '1').strip()
         folio = (request.POST.get('folio') or '').strip()
         fecha_recepcion = (request.POST.get('fecha_recepcion') or '').strip()
         medio_id = (request.POST.get('medio_id') or '').strip()
         nivel_id = (request.POST.get('nivel_id') or '').strip()
         producto = (request.POST.get('producto') or '').strip()
         causas_id = (request.POST.get('causas_id') or '').strip()
+        pori = (request.POST.get('pori') or '').strip().upper()
+        estatus = (request.POST.get('estatus') or '').strip()
         estado_id = (request.POST.get('estado_id') or '').strip()
         municipio = (request.POST.get('municipio') or '').strip()
+        localidad = (request.POST.get('localidad') or '').strip()
         colonia = (request.POST.get('colonia') or '').strip()
         cp = (request.POST.get('cp') or '').strip()
         tipo_persona = (request.POST.get('tipo_persona') or '').strip()
@@ -423,10 +428,16 @@ def create_queja(request):
         fecha_resolucion = (request.POST.get('fecha_resolucion') or '').strip()
         fecha_notificacion = (request.POST.get('fecha_notificacion') or '').strip()
         respuesta = (request.POST.get('respuesta') or '').strip()
+        num_penal = (request.POST.get('num_penal') or '').strip()
+        penalizacion_id = (request.POST.get('penalizacion_id') or '').strip()
 
-        # Basic validation
-        if not folio or not fecha_recepcion:
-            error = 'Folio y fecha de recepción son obligatorios.'
+        # Enhanced validation per REDECO requirements
+        if not all([no_trim, folio, fecha_recepcion, medio_id, nivel_id, producto, causas_id, pori, estatus, estado_id, municipio, colonia, cp, tipo_persona]):
+            error = 'Todos los campos marcados como requeridos deben ser completados.'
+        elif pori not in ['SI', 'NO']:
+            error = 'PORI debe ser "SI" o "NO" (mayúsculas).'
+        elif estatus not in ['1', '2']:
+            error = 'Estado debe ser 1 (Pendiente) o 2 (Concluido).'
         elif not token:
             error = 'Token no disponible. Genera un token desde la página principal.'
         else:
@@ -446,23 +457,29 @@ def create_queja(request):
                     return d
 
             payload = {
+                'QuejasNoTrim': int(no_trim) if no_trim.isdigit() else no_trim,
+                'QuejasNum': int(quejas_num) if quejas_num.isdigit() else 1,
                 'QuejasFolio': folio,
                 'QuejasFecRecepcion': _fmt_date(fecha_recepcion),
-                # map optional numeric ids to int when provided
-                'MedioId': int(medio_id) if medio_id.isdigit() else medio_id or None,
-                'NivelATId': int(nivel_id) if nivel_id.isdigit() else nivel_id or None,
-                'Producto': producto or None,
-                'CausasId': int(causas_id) if causas_id.isdigit() else causas_id or None,
-                'EstadosId': int(estado_id) if estado_id.isdigit() else estado_id or None,
-                'QuejasMunId': municipio or None,
-                'QuejasColId': colonia or None,
-                'QuejasCP': cp or None,
-                'QuejasTipoPersona': tipo_persona or None,
-                'QuejasSexo': sexo or None,
-                'QuejasEdad': int(edad) if edad.isdigit() else (edad or None),
-                'QuejasFecResolucion': _fmt_date(fecha_resolucion),
-                'QuejasFecNotificacion': _fmt_date(fecha_notificacion),
-                'QuejasRespuesta': respuesta or None,
+                'MedioId': int(medio_id) if medio_id.isdigit() else medio_id,
+                'NivelATId': int(nivel_id) if nivel_id.isdigit() else nivel_id,
+                'product': producto,
+                'CausasId': causas_id,
+                'QuejasPORI': pori,
+                'QuejasEstatus': int(estatus) if estatus.isdigit() else estatus,
+                'EstadosId': int(estado_id) if estado_id.isdigit() else estado_id,
+                'QuejasMunId': int(municipio) if municipio.isdigit() else municipio,
+                'QuejasLocId': int(localidad) if localidad and localidad.isdigit() else None,
+                'QuejasColId': int(colonia) if colonia.isdigit() else colonia,
+                'QuejasCP': cp,
+                'QuejasTipoPersona': int(tipo_persona) if tipo_persona.isdigit() else tipo_persona,
+                'QuejasSexo': sexo if sexo else None,
+                'QuejasEdad': int(edad) if edad and edad.isdigit() else None,
+                'QuejasFecResolucion': _fmt_date(fecha_resolucion) if fecha_resolucion else None,
+                'QuejasFecNotificacion': _fmt_date(fecha_notificacion) if fecha_notificacion else None,
+                'QuejasRespuesta': int(respuesta) if respuesta and respuesta.isdigit() else None,
+                'QuejasNumPenal': int(num_penal) if num_penal and num_penal.isdigit() else None,
+                'PenalizacionId': int(penalizacion_id) if penalizacion_id and penalizacion_id.isdigit() else None,
             }
 
             # Remove keys with value None to keep payload compact

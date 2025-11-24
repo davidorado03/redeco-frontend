@@ -2,11 +2,11 @@
 
 {% block content %}
 <div class="row">
-	<div class="col-md-8 offset-md-2">
+	<div class="col-md-10 offset-md-1">
 		<div class="card shadow-sm mt-4">
-					<div class="card-header">
-						<h5 class="text-white">Crear Queja</h5>
-					</div>
+			<div class="card-header">
+				<h5 class="text-white">Crear Queja</h5>
+			</div>
 			<div class="card-body">
 				{% if error %}
 				<div class="alert alert-danger">{{ error }}</div>
@@ -15,6 +15,238 @@
 				{% if success %}
 				<div class="alert alert-success">{{ success }}</div>
 				{% endif %}
+
+				<form method="post">
+					{% csrf_token %}
+					<div class="row">
+						<!-- CAMPOS REQUERIDOS PRINCIPALES -->
+						<div class="col-md-4 mb-3">
+							<label class="form-label">Mes a informar (QuejasNoTrim) <span class="text-danger">*</span></label>
+							<select name="no_trim" class="form-control" required>
+								<option value="">-- Seleccione --</option>
+								<option value="1">1 - Enero</option>
+								<option value="2">2 - Febrero</option>
+								<option value="3">3 - Marzo</option>
+								<option value="4">4 - Abril</option>
+								<option value="5">5 - Mayo</option>
+								<option value="6">6 - Junio</option>
+								<option value="7">7 - Julio</option>
+								<option value="8">8 - Agosto</option>
+								<option value="9">9 - Septiembre</option>
+								<option value="10">10 - Octubre</option>
+								<option value="11">11 - Noviembre</option>
+								<option value="12">12 - Diciembre</option>
+							</select>
+							<small class="form-text text-muted">Requerido: Mes del trimestre a reportar</small>
+						</div>
+
+						<div class="col-md-4 mb-3">
+							<label class="form-label">Número de quejas (QuejasNum) <span class="text-danger">*</span></label>
+							<input type="number" name="quejas_num" class="form-control" value="1" min="1" required />
+							<small class="form-text text-muted">Valor por default: 1</small>
+						</div>
+
+						<div class="col-md-4 mb-3">
+							<label class="form-label">Folio (QuejasFolio) <span class="text-danger">*</span></label>
+							<input name="folio" class="form-control" maxlength="50" required />
+							<small class="form-text text-muted">Requerido: Máx. 50 caracteres</small>
+						</div>
+
+						<div class="col-md-4 mb-3">
+							<label class="form-label">Fecha de recepción <span class="text-danger">*</span></label>
+							<input type="date" name="fecha_recepcion" class="form-control" required />
+							<small class="form-text text-muted">Debe estar dentro del mes a reportar</small>
+						</div>
+
+						<div class="col-md-4 mb-3">
+							<label class="form-label">Medio de recepción <span class="text-danger">*</span></label>
+							<select name="medio_id" class="form-control" required>
+								<option value="">-- Seleccione --</option>
+								{% for m in medios %}
+									{% if m.id %}
+									<option value="{{ m.id }}">{{ m.nombre|default:m.name|default:m.label }}</option>
+									{% else %}
+									<option value="{{ m }}">{{ m }}</option>
+									{% endif %}
+								{% endfor %}
+							</select>
+							<small class="form-text text-muted">Ver catálogo de medios</small>
+						</div>
+
+						<div class="col-md-4 mb-3">
+							<label class="form-label">Nivel de atención <span class="text-danger">*</span></label>
+							<select name="nivel_id" class="form-control" required>
+								<option value="">-- Seleccione --</option>
+								{% for n in niveles %}
+									{% if n.id %}
+									<option value="{{ n.id }}">{{ n.nombre|default:n.name|default:n.label }}</option>
+									{% else %}
+									<option value="{{ n }}">{{ n }}</option>
+									{% endif %}
+								{% endfor %}
+							</select>
+							<small class="form-text text-muted">Ver catálogo de niveles</small>
+						</div>
+
+						<div class="col-md-6 mb-3">
+							<label class="form-label">Producto (product) <span class="text-danger">*</span></label>
+							<input name="producto" class="form-control" maxlength="12" required />
+							<small class="form-text text-muted">Código de producto (máx. 12 caracteres)</small>
+						</div>
+
+						<div class="col-md-6 mb-3">
+							<label class="form-label">Causa (CausasId) <span class="text-danger">*</span></label>
+							<input name="causas_id" class="form-control" maxlength="4" required />
+							<small class="form-text text-muted">Clave de causa (máx. 4 caracteres)</small>
+						</div>
+
+						<div class="col-md-4 mb-3">
+							<label class="form-label">PORI <span class="text-danger">*</span></label>
+							<select name="pori" class="form-control" required>
+								<option value="">-- Seleccione --</option>
+								<option value="SI">SI</option>
+								<option value="NO">NO</option>
+							</select>
+							<small class="form-text text-muted">Debe ser "SI" o "NO" (mayúsculas)</small>
+						</div>
+
+						<div class="col-md-4 mb-3">
+							<label class="form-label">Estado de queja <span class="text-danger">*</span></label>
+							<select name="estatus" class="form-control" required>
+								<option value="">-- Seleccione --</option>
+								<option value="1">1 - Pendiente</option>
+								<option value="2">2 - Concluido</option>
+							</select>
+							<small class="form-text text-muted">1=Pendiente, 2=Concluido</small>
+						</div>
+
+						<div class="col-md-4 mb-3">
+							<label class="form-label">Entidad Federativa <span class="text-danger">*</span></label>
+							<select name="estado_id" class="form-control" required>
+								<option value="">-- Seleccione --</option>
+								{% for e in estados %}
+									{% if e.id %}
+									<option value="{{ e.id }}">{{ e.nombre|default:e.name|default:e.estado }}</option>
+									{% else %}
+									<option value="{{ e }}">{{ e }}</option>
+									{% endif %}
+								{% endfor %}
+							</select>
+							<small class="form-text text-muted">Ver catálogo de estados</small>
+						</div>
+
+						<!-- DATOS GEOGRÁFICOS REQUERIDOS -->
+						<div class="col-md-3 mb-3">
+							<label class="form-label">Municipio <span class="text-danger">*</span></label>
+							<input name="municipio" class="form-control" maxlength="8" required />
+							<small class="form-text text-muted">Clave del municipio (máx. 8 dígitos)</small>
+						</div>
+
+						<div class="col-md-3 mb-3">
+							<label class="form-label">Localidad</label>
+							<input name="localidad" class="form-control" maxlength="8" />
+							<small class="form-text text-muted">Opcional (máx. 8 dígitos)</small>
+						</div>
+
+						<div class="col-md-3 mb-3">
+							<label class="form-label">Colonia <span class="text-danger">*</span></label>
+							<input name="colonia" class="form-control" maxlength="8" required />
+							<small class="form-text text-muted">Clave de colonia (máx. 8 dígitos)</small>
+						</div>
+
+						<div class="col-md-3 mb-3">
+							<label class="form-label">Código Postal <span class="text-danger">*</span></label>
+							<input name="cp" class="form-control" maxlength="10" required />
+							<small class="form-text text-muted">Requerido (máx. 10 caracteres)</small>
+						</div>
+
+						<!-- DATOS DEL USUARIO -->
+						<div class="col-md-4 mb-3">
+							<label class="form-label">Tipo de persona <span class="text-danger">*</span></label>
+							<select name="tipo_persona" class="form-control" required>
+								<option value="">-- Seleccione --</option>
+								<option value="1">1 - Persona Física</option>
+								<option value="2">2 - Persona Moral</option>
+							</select>
+							<small class="form-text text-muted">1=Física, 2=Moral</small>
+						</div>
+
+						<div class="col-md-4 mb-3">
+							<label class="form-label">Sexo</label>
+							<select name="sexo" class="form-control">
+								<option value="">-- --</option>
+								<option value="H">H - Hombre</option>
+								<option value="M">M - Mujer</option>
+							</select>
+							<small class="form-text text-muted">Solo para persona física</small>
+						</div>
+
+						<div class="col-md-4 mb-3">
+							<label class="form-label">Edad</label>
+							<input type="number" name="edad" class="form-control" min="0" max="999" />
+							<small class="form-text text-muted">Solo para persona física (máx. 3 dígitos)</small>
+						</div>
+
+						<!-- RESOLUCIÓN Y NOTIFICACIÓN -->
+						<div class="col-md-6 mb-3">
+							<label class="form-label">Fecha de resolución</label>
+							<input type="date" name="fecha_resolucion" class="form-control" />
+							<small class="form-text text-muted">Opcional (formato dd/mm/aaaa)</small>
+						</div>
+
+						<div class="col-md-6 mb-3">
+							<label class="form-label">Fecha de notificación</label>
+							<input type="date" name="fecha_notificacion" class="form-control" />
+							<small class="form-text text-muted">Opcional (formato dd/mm/aaaa)</small>
+						</div>
+
+						<div class="col-md-12 mb-3">
+							<label class="form-label">Sentido de la resolución</label>
+							<select name="respuesta" class="form-control">
+								<option value="">-- --</option>
+								<option value="1">1 - Totalmente favorable al usuario</option>
+								<option value="2">2 - Desfavorable al usuario</option>
+								<option value="3">3 - Parcialmente favorable al usuario</option>
+							</select>
+							<small class="form-text text-muted">Cuando estado=Concluido (2). Puede ser nulo si estado=Pendiente (1)</small>
+						</div>
+
+						<!-- PENALIZACIONES -->
+						<div class="col-md-6 mb-3">
+							<label class="form-label">Número de penalización</label>
+							<input type="number" name="num_penal" class="form-control" min="0" max="9999" />
+							<small class="form-text text-muted">Número de penalizaciones impuestas (máx. 4 dígitos)</small>
+						</div>
+
+						<div class="col-md-6 mb-3">
+							<label class="form-label">Tipo de penalización</label>
+							<select name="penalizacion_id" class="form-control">
+								<option value="">-- --</option>
+								<option value="1">1 - Contractuales - Cancelación del contrato</option>
+								<option value="2">2 - Contractuales - Reasignación de cartera</option>
+								<option value="3">3 - Económicas - Multa</option>
+							</select>
+							<small class="form-text text-muted">Opcional</small>
+						</div>
+					</div>
+
+					<div class="d-flex gap-2 mt-3">
+						<button class="btn btn-primary" type="submit">Enviar Queja</button>
+						<a class="btn btn-secondary" href="{% url 'redeco_frontend:index' %}">Volver</a>
+					</div>
+				</form>
+
+				{% if payload_text %}
+				<div class="mt-4">
+					<label class="form-label fw-bold">Payload enviado (JSON)</label>
+					<pre class="p-3 bg-light border rounded" style="max-height:400px;overflow:auto;font-size:0.85rem;">{{ payload_text }}</pre>
+				</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
 
 						<form method="post">
 							{% csrf_token %}
