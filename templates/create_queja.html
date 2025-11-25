@@ -19,28 +19,15 @@
 				<form method="post">
 					{% csrf_token %}
 					<div class="row">
-						<!-- CAMPOS REQUERIDOS PRINCIPALES -->
-						<div class="col-md-4 mb-3">
-							<label class="form-label">Mes a informar (QuejasNoTrim) <span class="text-danger">*</span></label>
-							<select name="no_trim" class="form-control" required>
-								<option value="">-- Seleccione --</option>
-								<option value="1">1 - Enero</option>
-								<option value="2">2 - Febrero</option>
-								<option value="3">3 - Marzo</option>
-								<option value="4">4 - Abril</option>
-								<option value="5">5 - Mayo</option>
-								<option value="6">6 - Junio</option>
-								<option value="7">7 - Julio</option>
-								<option value="8">8 - Agosto</option>
-								<option value="9">9 - Septiembre</option>
-								<option value="10">10 - Octubre</option>
-								<option value="11">11 - Noviembre</option>
-								<option value="12">12 - Diciembre</option>
-							</select>
-							<small class="form-text text-muted">Requerido: Mes del trimestre a reportar</small>
-						</div>
+					<!-- CAMPOS REQUERIDOS PRINCIPALES -->
+					<div class="col-md-4 mb-3">
+						<label class="form-label">Mes a informar (QuejasNoTrim)</label>
+						<input type="hidden" name="no_trim" value="{{ current_month }}" />
+						<input type="text" class="form-control" value="{{ current_month }} - {% if current_month == 1 %}Enero{% elif current_month == 2 %}Febrero{% elif current_month == 3 %}Marzo{% elif current_month == 4 %}Abril{% elif current_month == 5 %}Mayo{% elif current_month == 6 %}Junio{% elif current_month == 7 %}Julio{% elif current_month == 8 %}Agosto{% elif current_month == 9 %}Septiembre{% elif current_month == 10 %}Octubre{% elif current_month == 11 %}Noviembre{% elif current_month == 12 %}Diciembre{% endif %}" readonly />
+						<small class="form-text text-muted">Mes actual (calculado automáticamente)</small>
+					</div>
 
-						<div class="col-md-4 mb-3">
+					<div class="col-md-4 mb-3">
 							<label class="form-label">Número de quejas (QuejasNum) <span class="text-danger">*</span></label>
 							<input type="number" name="quejas_num" class="form-control" value="1" min="1" required />
 							<small class="form-text text-muted">Valor por default: 1</small>

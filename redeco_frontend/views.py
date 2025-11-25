@@ -461,6 +461,12 @@ def create_queja(request):
     error = None
     success = None
     payload_sent = None
+    
+    # Calculate current month automatically
+    current_month = datetime.now().month
+    
+    # Calculate current month automatically
+    current_month = datetime.now().month
 
     # Fetch catalogs for the form selects
     medios = []
@@ -645,6 +651,7 @@ def create_queja(request):
         'estados': estados,
         'productos': productos,
         'payload_text': payload_sent,
+        'current_month': current_month,
     }
 
     return render(request, 'create_queja.html', context)
