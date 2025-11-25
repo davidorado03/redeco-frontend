@@ -124,7 +124,7 @@
 							<select id="estado_id_geo" name="estado_id" class="form-control" required>
 								<option value="">-- Seleccione --</option>
 								{% for e in estados %}
-								<option value="{{ e.claveEdo|default:e.estadoId|default:e.id }}">{{ e.estado|default:e.nombre|default:e.name }}</option>
+								<option value="{{ e.claveEdo }}">{{ e.estado }}</option>
 								{% endfor %}
 							</select>
 							<small class="form-text text-muted">Seleccione el estado</small>
