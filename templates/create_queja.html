@@ -403,7 +403,7 @@
 		}
 		causasSelect.innerHTML = '<option value="">Cargando causas...</option>';
 		try {
-			const resp = await fetch(`/catalogos/causas/?product=${encodeURIComponent(productCode)}`, {headers: {'X-Requested-With': 'XMLHttpRequest'}});
+			const resp = await fetch(`/catalogs/causas/?product=${encodeURIComponent(productCode)}`, {headers: {'X-Requested-With': 'XMLHttpRequest'}});
 			if (!resp.ok) throw new Error('HTTP ' + resp.status);
 			let data;
 			try { data = await resp.json(); } catch { data = {}; }
