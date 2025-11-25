@@ -176,11 +176,8 @@ def call_protected_endpoint(path: str, token: str, params: dict = None, timeout:
     base = getattr(settings, 'REDECO_API_BASE', 'https://api.condusef.gob.mx')
     url = f"{base.rstrip('/')}/{path.lstrip('/')}"
 
-    # Ensure token has Bearer prefix if not already present
-    auth_token = token if token.startswith('Bearer ') else f'Bearer {token}'
-    
     headers = {
-        'Authorization': auth_token,
+        'Authorization': token,
     }
 
     try:
