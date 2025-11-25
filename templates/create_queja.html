@@ -277,7 +277,6 @@
 	// Cargar municipios y colonias cuando se ingresa un CP válido
 	cpInput.addEventListener('input', function() {
 		const cp = this.value.trim();
-		const estadoId = estadoSelect.value;
 
 		// Reset dependientes
 		municipioSelect.innerHTML = '<option value="">-- Ingrese CP primero --</option>';
@@ -290,26 +289,18 @@
 			return;
 		}
 
-		if (!estadoId) {
-			municipioSelect.innerHTML = '<option value="">-- Seleccione estado primero --</option>';
-			coloniaSelect.innerHTML = '<option value="">-- Seleccione estado primero --</option>';
-			return;
-		}
-
 		// Mostrar cargando
 		municipioSelect.innerHTML = '<option value="">-- Cargando... --</option>';
 		coloniaSelect.innerHTML = '<option value="">-- Cargando... --</option>';
 
-		// Cargar municipios
-		loadMunicipios(estadoId, cp);
-		
-		// Cargar colonias
+		// Cargar municipios y colonias
+		loadMunicipios(cp);
 		loadColonias(cp);
 	});
 
-	async function loadMunicipios(estadoId, cp) {
+	async function loadMunicipios(cp) {
 		try {
-			const response = await fetch(`${API_BASE}/sepomex/municipios/?estado_id=${estadoId}&cp=${cp}`);
+			const response = await fetch(`${API_BASE}/sepomex/municipios/?cp=${cp}`);
 			if (!response.ok) throw new Error('Error al cargar municipios');
 			
 			const data = await response.json();
