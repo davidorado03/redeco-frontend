@@ -176,8 +176,11 @@ def call_protected_endpoint(path: str, token: str, params: dict = None, timeout:
     base = getattr(settings, 'REDECO_API_BASE', 'https://api.condusef.gob.mx')
     url = f"{base.rstrip('/')}/{path.lstrip('/')}"
 
+    # Ensure token has Bearer prefix if not already present
+    auth_token = token if token.startswith('Bearer ') else f'Bearer {token}'
+    
     headers = {
-        'Authorization': token,
+        'Authorization': auth_token,
     }
 
     try:
@@ -322,8 +325,11 @@ def create_queja(token: str, payload, timeout: int = 20) -> dict:
     base = getattr(settings, 'REDECO_API_BASE', 'https://api.condusef.gob.mx')
     url = f"{base.rstrip('/')}/redeco/quejas"
 
+    # Ensure token has Bearer prefix if not already present
+    auth_token = token if token.startswith('Bearer ') else f'Bearer {token}'
+    
     headers = {
-        'Authorization': token,
+        'Authorization': auth_token,
         'Content-Type': 'application/json',
     }
 
