@@ -320,6 +320,8 @@ def catalogs_productos(request):
 @require_token
 def catalogs_causas(request):
     """Fetch and display causas catalog (protected endpoint requiring token)."""
+    from django.http import JsonResponse
+    
     token = request.session.get('redeco_token')
     product = request.GET.get('product', '028212721377')  # default product code
     data = None
@@ -357,6 +359,13 @@ def catalogs_causas(request):
         except services.RedeCoAPIError as exc:
             error = str(exc)
 
+    # If AJAX request, return JSON
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if error:
+            return JsonResponse({'error': error}, status=400)
+        return JsonResponse(data if data else {'causas': []})
+
+    # Otherwise render HTML template
     context = {
         'token': token,
         'product': product,
