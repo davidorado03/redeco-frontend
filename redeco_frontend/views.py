@@ -326,10 +326,39 @@ def catalogs_causas(request):
     product = request.GET.get('product', '')  # Get from query param, no default
     data = None
     error = None
+    productos = []
 
     if not token:
         error = 'Token no disponible. Genera un token desde la página principal.'
-    elif product:  # Only call API if product is provided
+    else:
+        # Load productos list for the dropdown
+        try:
+            response = services.call_protected_endpoint(
+                'catalogos/products-list',
+                token
+            )
+            if isinstance(response, dict):
+                for key in ('products', 'productos', 'productsList', 'listaProductos'):
+                    val = response.get(key)
+                    if isinstance(val, list) and val:
+                        productos = val
+                        break
+                if not productos and isinstance(response.get('data'), dict):
+                    nested = response.get('data')
+                    for key in ('products', 'productos', 'productsList', 'listaProductos'):
+                        val = nested.get(key)
+                        if isinstance(val, list) and val:
+                            productos = val
+                            break
+                if not productos and isinstance(response.get('data'), list):
+                    productos = response.get('data')
+            elif isinstance(response, list):
+                productos = response
+            productos = productos or []
+        except services.RedeCoAPIError:
+            pass  # productos remains empty list
+        
+    if product:  # Only call API if product is provided
         try:
             response = services.call_protected_endpoint(
                 'catalogos/causas-list/',
@@ -368,6 +397,8 @@ def catalogs_causas(request):
     # Otherwise render HTML template
     context = {
         'token': token,
+        'productos': productos,
+        'product': product,
         'product': product,
         'data': data,
         'error': error,

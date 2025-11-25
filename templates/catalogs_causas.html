@@ -25,18 +25,21 @@
       <div class="card-body">
         <form method="get" class="row g-3">
           <div class="col-md-8">
-            <label for="product_input" class="form-label">Código de Producto</label>
-            <input 
-              type="text" 
-              id="product_input" 
+            <label for="product_select" class="form-label">Producto</label>
+            <select 
+              id="product_select" 
               name="product" 
-              class="form-control" 
-              placeholder="Ej: 028212721377" 
-              value="{{ product }}"
-              maxlength="12"
+              class="form-select" 
               required
-            />
-            <small class="form-text text-muted">Ingrese el código del producto (máx. 12 caracteres)</small>
+            >
+              <option value="">-- Seleccione un producto --</option>
+              {% for p in productos %}
+              <option value="{{ p.productId }}" {% if p.productId == product %}selected{% endif %}>
+                {{ p.product }}
+              </option>
+              {% endfor %}
+            </select>
+            <small class="form-text text-muted">Seleccione un producto para ver sus causas</small>
           </div>
           <div class="col-md-4 d-flex align-items-end">
             <button type="submit" class="btn btn-primary w-100">Buscar Causas</button>
