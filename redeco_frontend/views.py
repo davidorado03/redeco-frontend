@@ -461,6 +461,7 @@ def create_queja(request):
     error = None
     success = None
     payload_sent = None
+    form = {}
     
     # Calculate current month automatically
     current_month = datetime.now().month
@@ -580,6 +581,33 @@ def create_queja(request):
         num_penal = (request.POST.get('num_penal') or '').strip()
         penalizacion_id = (request.POST.get('penalizacion_id') or '').strip()
 
+        # Preserve submitted values to re-render the form after errors
+        form = {
+            'no_trim': no_trim,
+            'quejas_num': quejas_num,
+            'folio': folio,
+            'fecha_recepcion': fecha_recepcion,
+            'medio_id': medio_id,
+            'nivel_id': nivel_id,
+            'producto': producto,
+            'causas_id': causas_id,
+            'pori': pori,
+            'estatus': estatus,
+            'estado_id': estado_id,
+            'municipio': municipio,
+            'localidad': localidad,
+            'colonia': colonia,
+            'cp': cp,
+            'tipo_persona': tipo_persona,
+            'sexo': sexo,
+            'edad': edad,
+            'fecha_resolucion': fecha_resolucion,
+            'fecha_notificacion': fecha_notificacion,
+            'respuesta': respuesta,
+            'num_penal': num_penal,
+            'penalizacion_id': penalizacion_id,
+        }
+
         # Enhanced validation per REDECO requirements
         if not all([no_trim, folio, fecha_recepcion, medio_id, nivel_id, producto, causas_id, pori, estatus, estado_id, municipio, colonia, cp, tipo_persona]):
             error = 'Todos los campos marcados como requeridos deben ser completados.'
@@ -652,6 +680,7 @@ def create_queja(request):
         'productos': productos,
         'payload_text': payload_sent,
         'current_month': current_month,
+        'form': form,
     }
 
     return render(request, 'create_queja.html', context)

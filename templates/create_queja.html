@@ -29,19 +29,19 @@
 
 					<div class="col-md-4 mb-3">
 							<label class="form-label">Número de quejas <span class="text-danger">*</span></label>
-							<input type="number" name="quejas_num" class="form-control" value="1" min="1" required />
+						<input type="number" name="quejas_num" class="form-control" value="{{ form.quejas_num|default:'1' }}" min="1" required />
 							<small class="form-text text-muted">Valor por default: 1</small>
 						</div>
 
 						<div class="col-md-4 mb-3">
 							<label class="form-label">Folio <span class="text-danger">*</span></label>
-							<input name="folio" class="form-control" maxlength="50" required />
+						<input name="folio" class="form-control" maxlength="50" value="{{ form.folio }}" required />
 							<small class="form-text text-muted">Requerido: Máx. 50 caracteres</small>
 						</div>
 
 						<div class="col-md-4 mb-3">
 							<label class="form-label">Fecha de recepción <span class="text-danger">*</span></label>
-							<input type="date" name="fecha_recepcion" class="form-control" required />
+						<input type="date" name="fecha_recepcion" class="form-control" value="{{ form.fecha_recepcion }}" required />
 							<small class="form-text text-muted">Debe estar dentro del mes a reportar</small>
 						</div>
 
@@ -136,7 +136,7 @@
 
 						<div class="col-md-3 mb-3">
 							<label class="form-label">Código Postal <span class="text-danger">*</span></label>
-							<input type="text" id="cp_input" name="cp" class="form-control" maxlength="5" pattern="[0-9]{5}" required />
+							<input type="text" id="cp_input" name="cp" class="form-control" maxlength="5" pattern="[0-9]{5}" value="{{ form.cp }}" required />
 							<small class="form-text text-muted">Ingrese el código postal (5 dígitos)</small>
 						</div>
 
@@ -158,7 +158,7 @@
 
 						<div class="col-md-12 mb-3">
 							<label class="form-label">Localidad</label>
-							<input name="localidad" class="form-control" maxlength="8" />
+							<input name="localidad" class="form-control" maxlength="8" value="{{ form.localidad }}" />
 						</div>
 						</div>
 
@@ -185,20 +185,20 @@
 
 						<div class="col-md-4 mb-3">
 							<label class="form-label">Edad</label>
-							<input type="number" name="edad" class="form-control" min="0" max="999" />
+							<input type="number" name="edad" class="form-control" min="0" max="999" value="{{ form.edad }}" />
 							<small class="form-text text-muted">Solo para persona física (máx. 3 dígitos)</small>
 						</div>
 
 						<!-- RESOLUCIÓN Y NOTIFICACIÓN -->
 						<div class="col-md-6 mb-3">
 							<label class="form-label">Fecha de resolución</label>
-							<input type="date" name="fecha_resolucion" class="form-control" />
+							<input type="date" name="fecha_resolucion" class="form-control" value="{{ form.fecha_resolucion }}" />
 							<small class="form-text text-muted">Opcional (formato dd/mm/aaaa)</small>
 						</div>
 
 						<div class="col-md-6 mb-3">
 							<label class="form-label">Fecha de notificación</label>
-							<input type="date" name="fecha_notificacion" class="form-control" />
+							<input type="date" name="fecha_notificacion" class="form-control" value="{{ form.fecha_notificacion }}" />
 							<small class="form-text text-muted">Opcional (formato dd/mm/aaaa)</small>
 						</div>
 
@@ -216,7 +216,7 @@
 						<!-- PENALIZACIONES -->
 						<div class="col-md-6 mb-3">
 							<label class="form-label">Número de penalización</label>
-							<input type="number" name="num_penal" class="form-control" min="0" max="9999" />
+							<input type="number" name="num_penal" class="form-control" min="0" max="9999" value="{{ form.num_penal }}" />
 							<small class="form-text text-muted">Número de penalizaciones impuestas (máx. 4 dígitos)</small>
 						</div>
 
@@ -257,6 +257,24 @@
 	const cpInput = document.getElementById('cp_input');
 	const municipioSelect = document.getElementById('municipio_select');
 	const coloniaSelect = document.getElementById('colonia_select');
+
+	// Valores iniciales enviados desde el servidor para re-hidratar el formulario tras error
+	const initial = {
+		medio: "{{ form.medio_id|default:''|escapejs }}",
+		nivel: "{{ form.nivel_id|default:''|escapejs }}",
+		estado: "{{ form.estado_id|default:''|escapejs }}",
+		cp: "{{ form.cp|default:''|escapejs }}",
+		municipio: "{{ form.municipio|default:''|escapejs }}",
+		colonia: "{{ form.colonia|default:''|escapejs }}",
+		product: "{{ form.producto|default:''|escapejs }}",
+		causa: "{{ form.causas_id|default:''|escapejs }}",
+		pori: "{{ form.pori|default:''|escapejs }}",
+		estatus: "{{ form.estatus|default:''|escapejs }}",
+		tipo_persona: "{{ form.tipo_persona|default:''|escapejs }}",
+		sexo: "{{ form.sexo|default:''|escapejs }}",
+		respuesta: "{{ form.respuesta|default:''|escapejs }}",
+		penalizacion_id: "{{ form.penalizacion_id|default:''|escapejs }}",
+	};
 
 	// Cargar municipios y colonias cuando se ingresa un CP válido
 	cpInput.addEventListener('input', function() {
@@ -305,6 +323,10 @@
 			});
 			
 			municipioSelect.disabled = false;
+			// Reseleccionar municipio previo si existe
+			if (initial.municipio) {
+				municipioSelect.value = initial.municipio;
+			}
 		} catch (error) {
 			console.error('Error cargando municipios:', error);
 			municipioSelect.innerHTML = '<option value="">Error al cargar municipios</option>';
@@ -334,6 +356,10 @@
 			});
 			
 			coloniaSelect.disabled = false;
+			// Reseleccionar colonia previa si existe
+			if (initial.colonia) {
+				coloniaSelect.value = initial.colonia;
+			}
 		} catch (error) {
 			console.error('Error cargando colonias:', error);
 			coloniaSelect.innerHTML = '<option value="">Error al cargar colonias</option>';
@@ -370,6 +396,10 @@
 			if (causas.length === 0) {
 				causasSelect.innerHTML = '<option value="">Sin causas para este producto</option>';
 			}
+			// Reseleccionar causa previa si existe
+			if (causas.length > 0 && initial.causa) {
+				causasSelect.value = initial.causa;
+			}
 		} catch (e) {
 			console.error('Error cargando causas', e);
 			causasSelect.innerHTML = '<option value="">Error al cargar causas</option>';
@@ -380,6 +410,38 @@
 		productoSelect.addEventListener('change', (e) => {
 			fetchCausas(e.target.value);
 		});
+	}
+
+	// Reaplicar selecciones básicas
+	const medioSelect = document.querySelector('select[name="medio_id"]');
+	if (medioSelect && initial.medio) medioSelect.value = initial.medio;
+	const nivelSelect = document.querySelector('select[name="nivel_id"]');
+	if (nivelSelect && initial.nivel) nivelSelect.value = initial.nivel;
+	if (estadoSelect && initial.estado) estadoSelect.value = initial.estado;
+	const poriSelect = document.querySelector('select[name="pori"]');
+	if (poriSelect && initial.pori) poriSelect.value = initial.pori;
+	const estatusSelect = document.querySelector('select[name="estatus"]');
+	if (estatusSelect && initial.estatus) estatusSelect.value = initial.estatus;
+	const tipoPersonaSelect = document.querySelector('select[name="tipo_persona"]');
+	if (tipoPersonaSelect && initial.tipo_persona) tipoPersonaSelect.value = initial.tipo_persona;
+	const sexoSelect = document.querySelector('select[name="sexo"]');
+	if (sexoSelect && initial.sexo) sexoSelect.value = initial.sexo;
+	const respuestaSelect = document.querySelector('select[name="respuesta"]');
+	if (respuestaSelect && initial.respuesta) respuestaSelect.value = initial.respuesta;
+	const penalizacionSelect = document.querySelector('select[name="penalizacion_id"]');
+	if (penalizacionSelect && initial.penalizacion_id) penalizacionSelect.value = initial.penalizacion_id;
+
+	// Producto y causas
+	if (productoSelect && initial.product) {
+		productoSelect.value = initial.product;
+		fetchCausas(initial.product);
+	}
+
+	// CP -> municipios/colonias
+	if (cpInput && initial.cp && /^\d{5}$/.test(initial.cp)) {
+		cpInput.value = initial.cp;
+		loadMunicipios(initial.cp);
+		loadColonias(initial.cp);
 	}
 })();
 </script>
