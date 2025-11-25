@@ -426,6 +426,7 @@ def create_queja(request):
     medios = []
     niveles = []
     estados = []
+    productos = []
 
     try:
         med_resp = services.call_public_endpoint('catalogos/medio-recepcion')
@@ -482,6 +483,30 @@ def create_queja(request):
         estados = []
 
     token = request.session.get('redeco_token')
+
+    # Productos catalog (protected, requires token)
+    if token:
+        try:
+            prod_resp = services.call_protected_endpoint('catalogos/products-list', token)
+            if isinstance(prod_resp, dict):
+                for key in ('products', 'productos', 'productsList', 'listaProductos'):
+                    val = prod_resp.get(key)
+                    if isinstance(val, list) and val:
+                        productos = val
+                        break
+                if not productos and isinstance(prod_resp.get('data'), dict):
+                    nested = prod_resp.get('data')
+                    for key in ('products', 'productos', 'productsList', 'listaProductos'):
+                        val = nested.get(key)
+                        if isinstance(val, list) and val:
+                            productos = val
+                            break
+                if not productos and isinstance(prod_resp.get('data'), list):
+                    productos = prod_resp.get('data')
+            elif isinstance(prod_resp, list):
+                productos = prod_resp
+        except services.RedeCoAPIError:
+            productos = []
 
     if request.method == 'POST':
         # Collect all form fields per REDECO spec
@@ -578,6 +603,7 @@ def create_queja(request):
         'medios': medios,
         'niveles': niveles,
         'estados': estados,
+        'productos': productos,
         'payload_text': payload_sent,
     }
 
