@@ -323,13 +323,13 @@ def catalogs_causas(request):
     from django.http import JsonResponse
     
     token = request.session.get('redeco_token')
-    product = request.GET.get('product', '028212721377')  # default product code
+    product = request.GET.get('product', '')  # Get from query param, no default
     data = None
     error = None
 
     if not token:
         error = 'Token no disponible. Genera un token desde la página principal.'
-    else:
+    elif product:  # Only call API if product is provided
         try:
             response = services.call_protected_endpoint(
                 'catalogos/causas-list/',
