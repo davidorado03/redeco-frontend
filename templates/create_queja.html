@@ -303,16 +303,16 @@
 	async function loadMunicipios(cp) {
 		try {
 				// Construir URL con respaldo usando estado_id si está disponible
-				let url = `${API_BASE}/sepomex/municipios/?cp=${encodeURIComponent(cp)}`;
-				if (estadoSelect && estadoSelect.value) {
-					url += `&estado_id=${encodeURIComponent(estadoSelect.value)}`;
+				if (!estadoSelect.value) {
+					municipioSelect.innerHTML = '<option value="">Seleccione estado primero</option>';
+					return;
 				}
-				let response = await fetch(url);
+				const url = `${API_BASE}/sepomex/municipios/?estado_id=${encodeURIComponent(estadoSelect.value)}&cp=${encodeURIComponent(cp)}`;
+				const response = await fetch(url);
 				if (!response.ok) {
-					// Intento de respaldo: sin estado_id
-					response = await fetch(`${API_BASE}/sepomex/municipios/?cp=${encodeURIComponent(cp)}`);
+					console.warn('Municipios respuesta no OK', response.status);
+					throw new Error('Error al cargar municipios');
 				}
-				if (!response.ok) throw new Error('Error al cargar municipios');
 			
 			const data = await response.json();
 			municipioSelect.innerHTML = '<option value="">-- Seleccione Municipio --</option>';
@@ -327,7 +327,7 @@
 			municipios.forEach(mun => {
 				const option = document.createElement('option');
 				const text = mun.nombre || mun.municipio || mun.name || '';
-				option.value = mun.id || mun.municipio_id || mun.clave || text;
+					option.value = mun.municipioId || mun.municipio_id || mun.id || mun.clave || text;
 				option.textContent = text || 'Municipio';
 				municipioSelect.appendChild(option);
 			});
@@ -335,11 +335,13 @@
 			municipioSelect.disabled = false;
 			// Reseleccionar municipio previo si existe
 			if (initial.municipio) {
-				municipioSelect.value = initial.municipio;
+					const opts = Array.from(municipioSelect.options);
+					const match = opts.find(o => o.value == initial.municipio || o.textContent == initial.municipio);
+					if (match) municipioSelect.value = match.value;
 			} else if (municipios.length === 1) {
 				// Si solo hay un municipio, seleccionarlo automáticamente
 				const only = municipios[0];
-				const onlyVal = (only.id || only.municipio_id || only.clave || only.nombre || only.municipio || only.name || '');
+					const onlyVal = (only.municipioId || only.municipio_id || only.id || only.clave || only.municipio || only.nombre || only.name || '');
 				municipioSelect.value = onlyVal;
 			}
 		} catch (error) {
