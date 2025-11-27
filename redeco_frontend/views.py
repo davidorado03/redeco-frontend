@@ -641,13 +641,13 @@ def create_queja(request):
                 'MedioId': int(medio_id) if medio_id.isdigit() else medio_id,
                 'NivelATId': int(nivel_id) if nivel_id.isdigit() else nivel_id,
                 'product': producto,
-                'CausasId': causas_id,
+                'CausasId': str(causas_id),  # Mantener como string
                 'QuejasPORI': pori,
                 'QuejasEstatus': int(estatus) if estatus.isdigit() else estatus,
                 'EstadosId': int(estado_id) if estado_id.isdigit() else estado_id,
-                'QuejasMunId': int(municipio) if municipio.isdigit() else municipio,
+                'QuejasMunId': municipio,  # Mantener como viene del select
                 'QuejasLocId': int(localidad) if localidad and localidad.isdigit() else None,
-                'QuejasColId': int(colonia) if colonia.isdigit() else colonia,
+                'QuejasColId': colonia,  # Mantener como viene del select
                 'QuejasCP': cp,
                 'QuejasTipoPersona': int(tipo_persona) if tipo_persona.isdigit() else tipo_persona,
                 'QuejasSexo': sexo if sexo else None,
