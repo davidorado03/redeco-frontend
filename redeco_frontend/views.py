@@ -571,6 +571,9 @@ def create_queja(request):
         municipio = (request.POST.get('municipio') or '').strip()
         localidad = (request.POST.get('localidad') or '').strip()
         colonia = (request.POST.get('colonia') or '').strip()
+        # Filtrar valores "undefined" que pueden venir del JavaScript
+        if colonia.lower() == 'undefined':
+            colonia = ''
         cp = (request.POST.get('cp') or '').strip()
         tipo_persona = (request.POST.get('tipo_persona') or '').strip()
         sexo = (request.POST.get('sexo') or '').strip()

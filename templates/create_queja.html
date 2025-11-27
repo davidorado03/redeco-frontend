@@ -50,11 +50,7 @@
 							<select name="medio_id" class="form-control" required>
 								<option value="">-- Seleccione --</option>
 								{% for m in medios %}
-									{% if m.id %}
-									<option value="{{ m.id }}">{{ m.nombre|default:m.name|default:m.label }}</option>
-									{% else %}
-									<option value="{{ m }}">{{ m }}</option>
-									{% endif %}
+								<option value="{{ m.medioId|default:m.id }}">{{ m.medioDsc|default:m.nombre|default:m.name }}</option>
 								{% endfor %}
 							</select>
 							<small class="form-text text-muted">Ver catálogo de medios</small>
@@ -65,11 +61,7 @@
 							<select name="nivel_id" class="form-control" required>
 								<option value="">-- Seleccione --</option>
 								{% for n in niveles %}
-									{% if n.id %}
-									<option value="{{ n.id }}">{{ n.nombre|default:n.name|default:n.label }}</option>
-									{% else %}
-									<option value="{{ n }}">{{ n }}</option>
-									{% endif %}
+								<option value="{{ n.nivelDeAtencionId|default:n.id }}">{{ n.nivelDeAtencionDsc|default:n.nombre|default:n.name }}</option>
 								{% endfor %}
 							</select>
 							<small class="form-text text-muted">Ver catálogo de niveles</small>
