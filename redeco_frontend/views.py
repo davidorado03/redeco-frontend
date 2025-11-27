@@ -664,7 +664,24 @@ def create_queja(request):
 
             try:
                 result = services.create_queja(token, payload)
-                success = 'Queja enviada correctamente.'
+                
+                # La API devuelve dos arreglos: uno de éxitos y otro de errores
+                # Verificar si hay errores en la respuesta
+                errores = result.get('errores') or result.get('errors') or []
+                exitos = result.get('agregados') or result.get('success') or result.get('data') or []
+                
+                if errores:
+                    # Si hay errores, mostrarlos
+                    error_msgs = []
+                    for err in errores:
+                        if isinstance(err, dict):
+                            error_msgs.append(err.get('mensaje') or err.get('message') or str(err))
+                        else:
+                            error_msgs.append(str(err))
+                    error = 'Errores al enviar queja: ' + '; '.join(error_msgs)
+                else:
+                    success = 'Queja enviada correctamente.'
+                
                 payload_sent = json.dumps({
                     'PAYLOAD_ENVIADO': payload,
                     'RESPUESTA_API': result
