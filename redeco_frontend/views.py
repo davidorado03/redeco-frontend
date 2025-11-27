@@ -634,7 +634,7 @@ def create_queja(request):
                     return d
 
             payload = {
-                'QuejasNoTrim': int(no_trim) if no_trim.isdigit() else no_trim,
+                'QuejasNoTrim': int(no_trim),
                 'QuejasNum': int(quejas_num) if quejas_num.isdigit() else 1,
                 'QuejasFolio': folio,
                 'QuejasFecRecepcion': _fmt_date(fecha_recepcion),
@@ -645,10 +645,10 @@ def create_queja(request):
                 'QuejasPORI': pori,
                 'QuejasEstatus': int(estatus) if estatus.isdigit() else estatus,
                 'EstadosId': int(estado_id) if estado_id.isdigit() else estado_id,
-                'QuejasMunId': municipio,  # Mantener como viene del select
+                'QuejasMunId': int(municipio) if municipio.isdigit() else municipio,  # Debe ser numérico
                 'QuejasLocId': int(localidad) if localidad and localidad.isdigit() else None,
-                'QuejasColId': colonia,  # Mantener como viene del select
-                'QuejasCP': cp,
+                'QuejasColId': int(colonia) if colonia.isdigit() else colonia,  # Debe ser numérico
+                'QuejasCP': int(cp) if cp.isdigit() else cp,  # Debe ser numérico
                 'QuejasTipoPersona': int(tipo_persona) if tipo_persona.isdigit() else tipo_persona,
                 'QuejasSexo': sexo if sexo else None,
                 'QuejasEdad': int(edad) if edad and edad.isdigit() else None,
