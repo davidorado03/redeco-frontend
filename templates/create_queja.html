@@ -45,25 +45,25 @@
 							<small class="form-text text-muted">Debe estar dentro del mes a reportar</small>
 						</div>
 
-						<div class="col-md-4 mb-3">
-							<label class="form-label">Medio de recepción <span class="text-danger">*</span></label>
-							<select name="medio_id" class="form-control" required>
-								<option value="">-- Seleccione --</option>
-								{% for m in medios %}
-								<option value="{{ m.medioId|default:m.id }}">{{ m.medioDsc|default:m.nombre|default:m.name }}</option>
-								{% endfor %}
-							</select>
-							<small class="form-text text-muted">Ver catálogo de medios</small>
-						</div>
+					<div class="col-md-4 mb-3">
+						<label class="form-label">Medio de recepción <span class="text-danger">*</span></label>
+						<select name="medio_id" class="form-control" required>
+							<option value="">-- Seleccione --</option>
+							{% for m in medios %}
+							<option value="{{ m.medioId }}">{{ m.medioDsc }}</option>
+							{% endfor %}
+						</select>
+						<small class="form-text text-muted">Ver catálogo de medios</small>
+					</div>
 
-						<div class="col-md-4 mb-3">
-							<label class="form-label">Nivel de atención <span class="text-danger">*</span></label>
-							<select name="nivel_id" class="form-control" required>
-								<option value="">-- Seleccione --</option>
-								{% for n in niveles %}
-								<option value="{{ n.nivelDeAtencionId|default:n.id }}">{{ n.nivelDeAtencionDsc|default:n.nombre|default:n.name }}</option>
-								{% endfor %}
-							</select>
+					<div class="col-md-4 mb-3">
+						<label class="form-label">Nivel de atención <span class="text-danger">*</span></label>
+						<select name="nivel_id" class="form-control" required>
+							<option value="">-- Seleccione --</option>
+							{% for n in niveles %}
+							<option value="{{ n.nivelDeAtencionId }}">{{ n.nivelDeAtencionDsc }}</option>
+							{% endfor %}
+						</select>
 							<small class="form-text text-muted">Ver catálogo de niveles</small>
 						</div>
 
