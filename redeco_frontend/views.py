@@ -621,16 +621,16 @@ def create_queja(request):
         elif not token:
             error = 'Token no disponible. Genera un token desde la página principal.'
         else:
-            # helper to convert html date (YYYY-MM-DD) to dd/mm/YYYY as used in examples
+            # helper to convert html date (YYYY-MM-DD) to dd/mm/yyyy as used in API
             def _fmt_date(d):
                 if not d:
                     return None
                 try:
-                    # Accept YYYY-MM-DD or already dd/mm/YYYY
+                    # Accept YYYY-MM-DD or already dd/mm/yyyy
                     if '-' in d:
                         dt = datetime.strptime(d, '%Y-%m-%d')
                         return dt.strftime('%d/%m/%Y')
-                    # try parsing dd/mm/YYYY
+                    # try parsing dd/mm/yyyy
                     dt = datetime.strptime(d, '%d/%m/%Y')
                     return dt.strftime('%d/%m/%Y')
                 except Exception:
@@ -649,21 +649,28 @@ def create_queja(request):
                 'QuejasEstatus': int(estatus) if estatus.isdigit() else estatus,
                 'EstadosId': int(estado_id) if estado_id.isdigit() else estado_id,
                 'QuejasMunId': int(municipio) if municipio.isdigit() else municipio,  # Debe ser numérico
-                'QuejasLocId': int(localidad) if localidad and localidad.isdigit() else None,
                 'QuejasColId': int(colonia) if colonia.isdigit() else colonia,  # Debe ser numérico
                 'QuejasCP': int(cp) if cp.isdigit() else cp,  # Debe ser numérico
                 'QuejasTipoPersona': int(tipo_persona) if tipo_persona.isdigit() else tipo_persona,
-                'QuejasSexo': sexo if sexo else None,
-                'QuejasEdad': int(edad) if edad and edad.isdigit() else None,
-                'QuejasFecResolucion': _fmt_date(fecha_resolucion) if fecha_resolucion else None,
-                'QuejasFecNotificacion': _fmt_date(fecha_notificacion) if fecha_notificacion else None,
-                'QuejasRespuesta': int(respuesta) if respuesta and respuesta.isdigit() else None,
-                'QuejasNumPenal': int(num_penal) if num_penal and num_penal.isdigit() else None,
-                'PenalizacionId': int(penalizacion_id) if penalizacion_id and penalizacion_id.isdigit() else None,
             }
-
-            # Remove keys with value None to keep payload compact
-            payload = {k: v for k, v in payload.items() if v is not None}
+            
+            # Campos opcionales - solo agregar si tienen valor
+            if localidad and localidad.isdigit():
+                payload['QuejasLocId'] = int(localidad)
+            if sexo:
+                payload['QuejasSexo'] = sexo
+            if edad and edad.isdigit():
+                payload['QuejasEdad'] = int(edad)
+            if fecha_resolucion:
+                payload['QuejasFecResolucion'] = _fmt_date(fecha_resolucion)
+            if fecha_notificacion:
+                payload['QuejasFecNotificacion'] = _fmt_date(fecha_notificacion)
+            if respuesta and respuesta.isdigit():
+                payload['QuejasRespuesta'] = int(respuesta)
+            if num_penal and num_penal.isdigit() and int(num_penal) > 0:
+                payload['QuejasNumPenal'] = int(num_penal)
+            if penalizacion_id and penalizacion_id.isdigit():
+                payload['PenalizacionId'] = int(penalizacion_id)
 
             try:
                 result = services.create_queja(token, payload)
