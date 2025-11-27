@@ -322,11 +322,8 @@ def create_queja(token: str, payload, timeout: int = 20) -> dict:
     base = getattr(settings, 'REDECO_API_BASE', 'https://api.condusef.gob.mx')
     url = f"{base.rstrip('/')}/redeco/quejas"
 
-    # Ensure token has Bearer prefix if not already present
-    auth_token = token if token.startswith('Bearer ') else f'Bearer {token}'
-    
     headers = {
-        'Authorization': auth_token,
+        'Authorization': token,
         'Content-Type': 'application/json',
     }
 
