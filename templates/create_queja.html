@@ -355,7 +355,7 @@
 			
 			colonias.forEach(col => {
 				const option = document.createElement('option');
-				option.value = col.id || col.clave || col.colonia_id;
+				option.value = col.colonia_id || col.id || col.clave;
 				option.textContent = col.nombre || col.colonia || col.name;
 				coloniaSelect.appendChild(option);
 			});
