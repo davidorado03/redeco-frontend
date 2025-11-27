@@ -336,25 +336,32 @@ def create_queja(token: str, payload, timeout: int = 20) -> dict:
     except requests.RequestException as exc:
         raise RedeCoAPIError(f"Error al conectar con la API REDECO: {exc}") from exc
 
+    # Siempre intentar parsear JSON primero
+    try:
+        data = resp.json()
+    except Exception:
+        data = None
+
     if resp.status_code in (200, 201):
-        try:
-            return resp.json()
-        except Exception:
-            return {'status': 'ok', 'code': resp.status_code, 'text': resp.text}
+        if data:
+            return data
+        return {'status': 'ok', 'code': resp.status_code, 'text': resp.text}
 
-    # Handle common errors with friendly messages
+    # Handle common errors with friendly messages - pero preservar la data JSON completa
     if resp.status_code == 401:
-        raise RedeCoAPIError("Error 401 Unauthorized: token inválido o expirado. Genera un nuevo token.")
+        raise RedeCoAPIError(f"Error 401 Unauthorized: token inválido o expirado. Respuesta: {data or resp.text[:200]}")
     if resp.status_code == 403:
-        raise RedeCoAPIError("Error 403 Forbidden: no tienes permisos para crear quejas.")
+        raise RedeCoAPIError(f"Error 403 Forbidden: no tienes permisos. Respuesta: {data or resp.text[:200]}")
     if resp.status_code >= 400:
-        try:
-            data = resp.json()
-        except Exception:
+        if data:
+            # Incluir la data completa en el mensaje de error para debugging
+            msg = None
+            if isinstance(data, dict):
+                msg = data.get('message') or data.get('msg') or data.get('detail') or data.get('error')
+            
+            if msg:
+                raise RedeCoAPIError(f"{msg} | Respuesta completa: {data}")
+            else:
+                raise RedeCoAPIError(f"API REDECO retornó error {resp.status_code}: {data}")
+        else:
             raise RedeCoAPIError(f"API REDECO retornó error {resp.status_code}: {resp.text[:200]}")
-
-        # Try to extract message
-        msg = None
-        if isinstance(data, dict):
-            msg = data.get('message') or data.get('msg') or data.get('detail') or data.get('error')
-        raise RedeCoAPIError(msg or f"API REDECO retornó error {resp.status_code}")
