@@ -664,11 +664,13 @@ def create_queja(request):
 
             try:
                 result = services.create_queja(token, payload)
+                success = 'Queja enviada correctamente.'
+                payload_sent = json.dumps({
+                    'PAYLOAD_ENVIADO': payload,
+                    'RESPUESTA_API': result
+                }, ensure_ascii=False, indent=2)
             except services.RedeCoAPIError as exc:
                 error = str(exc)
-                payload_sent = json.dumps(payload, ensure_ascii=False, indent=2)
-            else:
-                success = 'Queja enviada correctamente.'
                 payload_sent = json.dumps(payload, ensure_ascii=False, indent=2)
 
     context = {
