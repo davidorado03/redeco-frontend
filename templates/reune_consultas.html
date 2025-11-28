@@ -68,15 +68,15 @@
 
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label">Institución Clave <span class="text-danger">*</span></label>
-              <input type="text" name="institucion_clave" class="form-control" value="{{ form.institucion_clave }}" required />
-              <small class="form-text text-muted">Ej: Unión de Crédito Integral, S.A. de C.V.</small>
+              <label class="form-label">Denominación o Razón Social <span class="text-danger">*</span></label>
+              <input type="text" name="institucion_clave" class="form-control" value="{{ form.institucion_clave }}" maxlength="400" required />
+              <small class="form-text text-muted">Copiar de SIPRES/REUNE tal cual aparece (máx. 400 caracteres)</small>
             </div>
 
             <div class="col-md-6 mb-3">
               <label class="form-label">Sector <span class="text-danger">*</span></label>
-              <input type="text" name="sector" class="form-control" value="{{ form.sector }}" required />
-              <small class="form-text text-muted">Ej: Uniones de crédito</small>
+              <input type="text" name="sector" class="form-control" value="{{ form.sector }}" maxlength="200" required />
+              <small class="form-text text-muted">Copiar de SIPRES/REUNE tal cual aparece (máx. 200 caracteres)</small>
             </div>
           </div>
 
@@ -103,12 +103,14 @@
 
             <div class="col-md-3 mb-3">
               <label class="form-label">Número de Consultas <span class="text-danger">*</span></label>
-              <input type="number" name="num_consultas" class="form-control" value="{{ form.num_consultas|default:'1' }}" min="1" required />
+              <input type="number" name="num_consultas" class="form-control" value="1" readonly />
+              <small class="form-text text-muted">Siempre es 1 según disposición</small>
             </div>
 
             <div class="col-md-3 mb-3">
               <label class="form-label">Folio <span class="text-danger">*</span></label>
               <input type="text" name="consultas_folio" class="form-control" value="{{ form.consultas_folio }}" maxlength="50" required />
+              <small class="form-text text-muted">ÚNICO por institución (máx. 50 caracteres)</small>
             </div>
 
             <div class="col-md-3 mb-3">
@@ -122,14 +124,16 @@
           </div>
 
           <div class="row">
-            <div class="col-md-4 mb-3">
-              <label class="form-label">Fecha de Atención <span class="text-danger">*</span></label>
-              <input type="date" name="consultas_fec_aten" class="form-control" value="{{ form.consultas_fec_aten }}" required />
+            <div class="col-md-4 mb-3" id="fecha_aten_field">
+              <label class="form-label">Fecha de Atención <span class="text-danger" id="fecha_aten_required">*</span></label>
+              <input type="date" id="consultas_fec_aten" name="consultas_fec_aten" class="form-control" value="{{ form.consultas_fec_aten }}" />
+              <small class="form-text text-muted">Requerida solo si Estatus = Concluido (≥ Fecha Recepción)</small>
             </div>
 
             <div class="col-md-4 mb-3">
-              <label class="form-label">Fecha de Recepción <span class="text-danger">*</span></label>
+              <label class="form-label">Fecha de Consulta <span class="text-danger">*</span></label>
               <input type="date" name="consultas_fec_recepcion" class="form-control" value="{{ form.consultas_fec_recepcion }}" required />
+              <small class="form-text text-muted">Debe estar dentro del trimestre a reportar</small>
             </div>
 
             <div class="col-md-4 mb-3">
@@ -162,28 +166,29 @@
               </select>
             </div>
 
-            <div class="col-md-4 mb-3">
-              <label class="form-label">Nivel de Atención <span class="text-danger">*</span></label>
-              <select name="consultas_cat_nivel_aten_id" class="form-control" required>
+            <div class="col-md-4 mb-3" id="nivel_aten_field">
+              <label class="form-label">Nivel de Atención <span class="text-danger" id="nivel_aten_required">*</span></label>
+              <select id="consultas_cat_nivel_aten_id" name="consultas_cat_nivel_aten_id" class="form-control">
                 <option value="">-- Seleccione --</option>
                 {% for n in niveles %}
                 <option value="{{ n.nivelDeAtencionId }}">{{ n.nivelDeAtencionDsc }}</option>
                 {% endfor %}
               </select>
+              <small class="form-text text-muted">Requerido solo si Estatus = Concluido</small>
             </div>
 
             <div class="col-md-4 mb-3">
-              <label class="form-label">Producto <span class="text-danger">*</span></label>
-              <input type="text" name="producto" class="form-control" value="{{ form.producto }}" required />
-              <small class="form-text text-muted">Código del producto</small>
+              <label class="form-label">Producto y/o Servicio <span class="text-danger">*</span></label>
+              <input type="text" name="producto" class="form-control" value="{{ form.producto }}" maxlength="12" required />
+              <small class="form-text text-muted">Código del catálogo REUNE (máx. 12 caracteres)</small>
             </div>
           </div>
 
           <div class="row">
             <div class="col-md-12 mb-3">
-              <label class="form-label">Causa ID <span class="text-danger">*</span></label>
-              <input type="text" name="causa_id" class="form-control" value="{{ form.causa_id }}" required />
-              <small class="form-text text-muted">Código de la causa</small>
+              <label class="form-label">Causa o Motivo <span class="text-danger">*</span></label>
+              <input type="text" name="causa_id" class="form-control" value="{{ form.causa_id }}" maxlength="4" required />
+              <small class="form-text text-muted">Código del catálogo REUNE (máx. 4 caracteres)</small>
             </div>
           </div>
 
@@ -207,9 +212,10 @@
               </select>
             </div>
 
-            <div class="col-md-3 mb-3">
-              <label class="form-label">Código Postal <span class="text-danger">*</span></label>
-              <input type="text" name="consultas_cp" class="form-control" maxlength="5" pattern="[0-9]{5}" value="{{ form.consultas_cp }}" required />
+            <div class="col-md-3 mb-3" id="cp_field">
+              <label class="form-label">Código Postal <span class="text-danger" id="cp_required">*</span></label>
+              <input type="text" id="consultas_cp" name="consultas_cp" class="form-control" maxlength="5" pattern="[0-9]{5}" value="{{ form.consultas_cp }}" />
+              <small class="form-text text-muted">Requerido si medio = UNE/Sucursal/Oficina</small>
             </div>
 
             <div class="col-md-3 mb-3">
@@ -218,15 +224,17 @@
             </div>
 
             <div class="col-md-3 mb-3">
-              <label class="form-label">Localidad ID <span class="text-danger">*</span></label>
-              <input type="number" name="consultas_loc_id" class="form-control" value="{{ form.consultas_loc_id }}" required />
+              <label class="form-label">Localidad ID</label>
+              <input type="number" name="consultas_loc_id" class="form-control" value="{{ form.consultas_loc_id }}" />
+              <small class="form-text text-muted">Opcional - Catálogo REUNE</small>
             </div>
           </div>
 
           <div class="row">
             <div class="col-md-12 mb-3">
-              <label class="form-label">Colonia ID <span class="text-danger">*</span></label>
-              <input type="number" name="consultas_col_id" class="form-control" value="{{ form.consultas_col_id }}" required />
+              <label class="form-label">Colonia ID</label>
+              <input type="number" name="consultas_col_id" class="form-control" value="{{ form.consultas_col_id }}" />
+              <small class="form-text text-muted">Opcional - Catálogo REUNE</small>
             </div>
           </div>
 
@@ -290,6 +298,75 @@
             {% endif %}
             {% endfor %}
           </ul>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const estatusSelect = document.querySelector('select[name="consultas_estatus_con"]');
+  const fechaAtenField = document.getElementById('fecha_aten_field');
+  const fechaAtenInput = document.getElementById('consultas_fec_aten');
+  const fechaAtenRequired = document.getElementById('fecha_aten_required');
+  const nivelAtenField = document.getElementById('nivel_aten_field');
+  const nivelAtenSelect = document.getElementById('consultas_cat_nivel_aten_id');
+  const nivelAtenRequired = document.getElementById('nivel_aten_required');
+  const medioSelect = document.querySelector('select[name="medios_id"]');
+  const cpField = document.getElementById('cp_field');
+  const cpInput = document.getElementById('consultas_cp');
+  const cpRequired = document.getElementById('cp_required');
+
+  // Manejar campos condicionales según estatus
+  function updateConditionalFields() {
+    const estatus = estatusSelect.value;
+    const isConcluido = estatus === '2';
+
+    if (isConcluido) {
+      // Estatus = Concluido: Fecha Atención y Nivel son requeridos
+      fechaAtenInput.required = true;
+      fechaAtenRequired.style.display = '';
+      nivelAtenSelect.required = true;
+      nivelAtenRequired.style.display = '';
+    } else {
+      // Estatus = Pendiente: Fecha Atención y Nivel son opcionales
+      fechaAtenInput.required = false;
+      fechaAtenRequired.style.display = 'none';
+      nivelAtenSelect.required = false;
+      nivelAtenRequired.style.display = 'none';
+    }
+  }
+
+  // Manejar CP condicional según medio de recepción
+  function updateCPField() {
+    const medioId = medioSelect.value;
+    // Según REUNE: CP requerido para UNE (1), Sucursal (2), Oficina (4)
+    const requiereCP = ['1', '2', '4'].includes(medioId);
+
+    if (requiereCP) {
+      cpInput.required = true;
+      cpRequired.style.display = '';
+    } else {
+      cpInput.required = false;
+      cpRequired.style.display = 'none';
+    }
+  }
+
+  // Eventos
+  if (estatusSelect) {
+    estatusSelect.addEventListener('change', updateConditionalFields);
+    updateConditionalFields(); // Inicializar
+  }
+
+  if (medioSelect) {
+    medioSelect.addEventListener('change', updateCPField);
+    updateCPField(); // Inicializar
+  }
+});
+</script>
         </div>
         {% endif %}
       </div>

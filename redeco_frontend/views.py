@@ -489,14 +489,23 @@ def reune_consultas(request):
             }
             
             # Validate required fields
+            estatus = form.get('consultas_estatus_con', '')
+            medio_id = form.get('medios_id', '')
+            
             required_fields = [
                 'institucion_clave', 'sector', 'consultas_trim', 'num_consultas',
-                'consultas_folio', 'consultas_estatus_con', 'consultas_fec_aten',
-                'consultas_fec_recepcion', 'consultas_pori', 'medios_id',
-                'consultas_cat_nivel_aten_id', 'producto', 'causa_id',
-                'estados_id', 'consultas_cp', 'consultas_mpio_id',
-                'consultas_loc_id', 'consultas_col_id'
+                'consultas_folio', 'consultas_estatus_con', 'consultas_fec_recepcion',
+                'consultas_pori', 'medios_id', 'producto', 'causa_id',
+                'estados_id', 'consultas_mpio_id'
             ]
+            
+            # Fecha de atención y nivel requeridos solo si estatus = 2 (Concluido)
+            if estatus == '2':
+                required_fields.extend(['consultas_fec_aten', 'consultas_cat_nivel_aten_id'])
+            
+            # CP requerido para UNE (1), Sucursal (2), Oficina (4)
+            if medio_id in ['1', '2', '4']:
+                required_fields.append('consultas_cp')
             
             missing = [f for f in required_fields if not form.get(f)]
             if missing:
@@ -504,7 +513,6 @@ def reune_consultas(request):
             else:
                 try:
                     # Convert dates from YYYY-MM-DD to DD/MM/YYYY
-                    fec_aten = datetime.strptime(form['consultas_fec_aten'], '%Y-%m-%d').strftime('%d/%m/%Y')
                     fec_recepcion = datetime.strptime(form['consultas_fec_recepcion'], '%Y-%m-%d').strftime('%d/%m/%Y')
                     
                     # Build payload as array with single consulta
@@ -512,22 +520,34 @@ def reune_consultas(request):
                         "InstitucionClave": form['institucion_clave'],
                         "Sector": form['sector'],
                         "ConsultasTrim": int(form['consultas_trim']),
-                        "NumConsultas": int(form['num_consultas']),
+                        "NumConsultas": 1,  # Siempre 1 según disposición
                         "ConsultasFolio": form['consultas_folio'],
-                        "ConsultasEstatusCon": int(form['consultas_estatus_con']),
-                        "ConsultasFecAten": fec_aten,
+                        "ConsultasEstatusCon": int(estatus),
                         "EstadosId": int(form['estados_id']),
                         "ConsultasFecRecepcion": fec_recepcion,
-                        "MediosId": int(form['medios_id']),
+                        "MediosId": int(medio_id),
                         "Producto": form['producto'],
                         "CausaId": form['causa_id'],
-                        "ConsultasCP": int(form['consultas_cp']),
                         "ConsultasMpioId": int(form['consultas_mpio_id']),
-                        "ConsultasLocId": int(form['consultas_loc_id']),
-                        "ConsultasColId": int(form['consultas_col_id']),
-                        "ConsultascatnivelatenId": int(form['consultas_cat_nivel_aten_id']),
                         "ConsultasPori": form['consultas_pori']
                     }]
+                    
+                    # Agregar campos opcionales si están presentes
+                    if form.get('consultas_fec_aten'):
+                        fec_aten = datetime.strptime(form['consultas_fec_aten'], '%Y-%m-%d').strftime('%d/%m/%Y')
+                        payload[0]["ConsultasFecAten"] = fec_aten
+                    
+                    if form.get('consultas_cat_nivel_aten_id'):
+                        payload[0]["ConsultascatnivelatenId"] = int(form['consultas_cat_nivel_aten_id'])
+                    
+                    if form.get('consultas_cp'):
+                        payload[0]["ConsultasCP"] = int(form['consultas_cp'])
+                    
+                    if form.get('consultas_loc_id'):
+                        payload[0]["ConsultasLocId"] = int(form['consultas_loc_id'])
+                    
+                    if form.get('consultas_col_id'):
+                        payload[0]["ConsultasColId"] = int(form['consultas_col_id'])
                     
                     # Call REUNE API
                     result = services.post_reune_consultas_general(token, payload)
