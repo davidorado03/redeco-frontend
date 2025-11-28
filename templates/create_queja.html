@@ -183,10 +183,10 @@
 						</div>
 
 						<div class="row">
-							<div class="col-md-3 mb-3">
-								<label class="form-label">Entidad Federativa <span class="text-danger">*</span></label>
-								<input type="text" id="estado_nombre_display" class="form-control" readonly style="display:none;">
-								<select id="estado_id_geo" name="estado_id" class="form-control">
+					<div class="col-md-3 mb-3">
+						<label class="form-label">Entidad Federativa</label>
+						<input type="text" id="estado_nombre_display" class="form-control" readonly>
+						<select id="estado_id_geo" name="estado_id" class="form-control" style="display:none;">
 									<option value="">-- Seleccione --</option>
 									{% for e in estados %}
 									<option value="{{ e.claveEdo }}">{{ e.estado }}</option>
@@ -194,30 +194,28 @@
 								</select>
 							</div>
 
-							<div class="col-md-3 mb-3">
-								<label class="form-label">Código Postal <span class="text-danger">*</span></label>
-								<input type="text" id="cp_input" name="cp" class="form-control" maxlength="5" pattern="[0-9]{5}" value="{{ form.cp }}" required />
+					<div class="col-md-3 mb-3">
+						<label class="form-label">Código Postal</label>
+						<input type="text" id="cp_input" name="cp" class="form-control" readonly value="{{ form.cp }}" />
 							</div>
 
-							<div class="col-md-3 mb-3">
-								<label class="form-label">Municipio <span class="text-danger">*</span></label>
-								<input type="text" id="municipio_nombre_display" class="form-control" readonly style="display:none;">
-								<select id="municipio_select" name="municipio" class="form-control">
-								</select>
-								<small class="form-text text-muted">Según CP</small>
+					<div class="col-md-3 mb-3">
+						<label class="form-label">Municipio</label>
+						<input type="text" id="municipio_nombre_display" class="form-control" readonly>
+						<select id="municipio_select" name="municipio" class="form-control" style="display:none;">
+						</select>
 							</div>
 
-							<div class="col-md-3 mb-3">
-								<label class="form-label">Colonia <span class="text-danger">*</span></label>
-								<input type="text" id="colonia_nombre_display" class="form-control" readonly style="display:none;">
-								<select id="colonia_select" name="colonia" class="form-control">
-								</select>
-								<small class="form-text text-muted">Según CP</small>
+					<div class="col-md-3 mb-3">
+						<label class="form-label">Colonia</label>
+						<input type="text" id="colonia_nombre_display" class="form-control" readonly>
+						<select id="colonia_select" name="colonia" class="form-control" style="display:none;">
+						</select>
 							</div>
 
-							<div class="col-md-12 mb-3">
-								<label class="form-label">Localidad</label>
-								<input id="localidad_input" name="localidad" class="form-control" maxlength="8" value="{{ form.localidad }}" />
+					<div class="col-md-12 mb-3">
+						<label class="form-label">Localidad</label>
+						<input id="localidad_input" name="localidad" class="form-control" readonly value="{{ form.localidad }}" />
 							</div>
 						</div>
 					</div>
@@ -233,29 +231,29 @@
 						</div>
 
 						<div class="row">
-							<div class="col-md-4 mb-3">
-								<label class="form-label">Tipo de persona <span class="text-danger">*</span></label>
-								<input type="text" id="tipo_persona_display" class="form-control" readonly style="display:none;">
-								<select id="tipo_persona_select" name="tipo_persona" class="form-control">
+					<div class="col-md-4 mb-3">
+						<label class="form-label">Tipo de persona</label>
+						<input type="text" id="tipo_persona_display" class="form-control" readonly>
+						<select id="tipo_persona_select" name="tipo_persona" class="form-control" style="display:none;">
 									<option value="">-- Seleccione --</option>
 									<option value="1">1 - Persona Física</option>
 									<option value="2">2 - Persona Moral</option>
 								</select>
 							</div>
 
-							<div class="col-md-4 mb-3">
-								<label class="form-label">Sexo</label>
-								<input type="text" id="sexo_display" class="form-control" readonly style="display:none;">
-								<select id="sexo_select" name="sexo" class="form-control">
+					<div class="col-md-4 mb-3">
+						<label class="form-label">Sexo</label>
+						<input type="text" id="sexo_display" class="form-control" readonly>
+						<select id="sexo_select" name="sexo" class="form-control" style="display:none;">
 									<option value="">-- --</option>
 									<option value="H">H - Hombre</option>
 									<option value="M">M - Mujer</option>
 								</select>
 							</div>
 
-							<div class="col-md-4 mb-3">
-								<label class="form-label">Edad</label>
-								<input type="number" id="edad_input" name="edad" class="form-control" min="0" max="999" value="{{ form.edad }}" />
+					<div class="col-md-4 mb-3">
+						<label class="form-label">Edad</label>
+						<input type="text" id="edad_input" name="edad" class="form-control" readonly value="{{ form.edad }}" />
 							</div>
 						</div>
 					</div>
