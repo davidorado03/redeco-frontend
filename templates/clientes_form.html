@@ -22,7 +22,11 @@
 				</div>
 				{% endif %}
 
-				<form method="post" id="clienteForm">
+				<form method="post" id="clienteForm" 
+					  data-edit-mode="{% if edit_mode %}true{% else %}false{% endif %}"
+					  data-municipio-id="{% if edit_mode %}{{ cliente.municipio_id }}{% endif %}"
+					  data-colonia-id="{% if edit_mode %}{{ cliente.colonia_id }}{% endif %}"
+					  data-codigo-postal="{% if edit_mode %}{{ cliente.codigo_postal }}{% endif %}">
 					{% csrf_token %}
 					<div class="row">
 						<!-- Datos principales -->
@@ -134,6 +138,13 @@
 <script>
 (function() {
 	const API_BASE = 'https://api.condusef.gob.mx';
+	const form = document.getElementById('clienteForm');
+	const editMode = form.dataset.editMode === 'true';
+	const editData = {
+		municipioId: form.dataset.municipioId || '',
+		coloniaId: form.dataset.coloniaId || '',
+		codigoPostal: form.dataset.codigoPostal || ''
+	};
 	
 	const estadoSelect = document.getElementById('estado_select');
 	const cpInput = document.getElementById('cp_input');
@@ -214,11 +225,9 @@
 			
 			municipioSelect.disabled = false;
 			
-			{% if edit_mode %}
-			if ('{{ cliente.municipio_id }}') {
-				municipioSelect.value = '{{ cliente.municipio_id }}';
+			if (editMode && editData.municipioId) {
+				municipioSelect.value = editData.municipioId;
 			}
-			{% endif %}
 		} catch (error) {
 			console.error('Error cargando municipios:', error);
 			municipioSelect.innerHTML = '<option value="">Error al cargar municipios</option>';
@@ -246,11 +255,9 @@
 			
 			coloniaSelect.disabled = false;
 			
-			{% if edit_mode %}
-			if ('{{ cliente.colonia_id }}') {
-				coloniaSelect.value = '{{ cliente.colonia_id }}';
+			if (editMode && editData.coloniaId) {
+				coloniaSelect.value = editData.coloniaId;
 			}
-			{% endif %}
 		} catch (error) {
 			console.error('Error cargando colonias:', error);
 			coloniaSelect.innerHTML = '<option value="">Error al cargar colonias</option>';
@@ -269,12 +276,10 @@
 	});
 	
 	// Si estamos en modo edición y hay CP, cargar datos
-	{% if edit_mode and cliente.codigo_postal %}
-	if ('{{ cliente.codigo_postal }}'.length === 5) {
-		loadMunicipios('{{ cliente.codigo_postal }}');
-		loadColonias('{{ cliente.codigo_postal }}');
+	if (editMode && editData.codigoPostal && editData.codigoPostal.length === 5) {
+		loadMunicipios(editData.codigoPostal);
+		loadColonias(editData.codigoPostal);
 	}
-	{% endif %}
 })();
 </script>
 {% endblock %}
