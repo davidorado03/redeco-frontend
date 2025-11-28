@@ -54,12 +54,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'frontend_redeco.wsgi.application'
 
-# Database - use sqlite for local dev
+# Database
+# Use PostgreSQL in production (via DATABASE_URL env var), SQLite for local dev
+import dj_database_url
+import os
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
 
 # Session configuration - use cache/memory instead of database
