@@ -34,7 +34,7 @@
           </div>
           <div class="col-md-6 mb-3">
             <form method="get" class="d-flex gap-2">
-              <input type="number" name="page" class="form-control" placeholder="Número de página" min="1" value="{{ page if page != 'total' else '' }}" required />
+              <input type="number" name="page" class="form-control" placeholder="Número de página" min="1" {% if page and page != 'total' %}value="{{ page }}"{% endif %} required />
               <button type="submit" class="btn btn-success" {% if not token %}disabled{% endif %}>
                 <i class="bi bi-search"></i> Consultar
               </button>
