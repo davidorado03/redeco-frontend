@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+	<div class="col-md-10 offset-md-1">
+		<div class="card shadow-sm mt-4">
+			<div class="card-header">
+				<h5 class="text-white">{% if edit_mode %}Editar{% else %}Crear{% endif %} Cliente</h5>
+			</div>
+			<div class="card-body">
+				{% if error %}
+				<div class="alert alert-danger alert-dismissible fade show">
+					{{ error }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+				</div>
+				{% endif %}
+
+				{% if success %}
+				<div class="alert alert-success alert-dismissible fade show">
+					{{ success }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+				</div>
+				{% endif %}
+
+				<form method="post" id="clienteForm">
+					{% csrf_token %}
+					<div class="row">
+						<!-- Datos principales -->
+						<div class="col-md-6 mb-3">
+							<label class="form-label">Nombre del cliente <span class="text-danger">*</span></label>
+							<input type="text" name="nombre" class="form-control" 
+								   value="{% if edit_mode %}{{ cliente.nombre }}{% else %}{{ form.nombre }}{% endif %}" 
+								   required maxlength="255" />
+						</div>
+
+						<div class="col-md-6 mb-3">
+							<label class="form-label">RFC <span class="text-danger">*</span></label>
+							<input type="text" name="rfc" class="form-control" 
+								   value="{% if edit_mode %}{{ cliente.rfc }}{% else %}{{ form.rfc }}{% endif %}" 
+								   required maxlength="13" pattern="[A-Z&Ñ]{3,4}[0-9]{6}[A-Z0-9]{3}" 
+								   style="text-transform:uppercase;" />
+							<small class="form-text text-muted">Formato: XAXX010101000 (12-13 caracteres)</small>
+						</div>
+
+						<div class="col-md-6 mb-3">
+							<label class="form-label">Tipo de persona <span class="text-danger">*</span></label>
+							<select name="tipo_persona" id="tipo_persona" class="form-control" required>
+								<option value="">-- Seleccione --</option>
+								<option value="1" {% if edit_mode and cliente.tipo_persona == 1 %}selected{% elif form.tipo_persona == '1' %}selected{% endif %}>Persona Física</option>
+								<option value="2" {% if edit_mode and cliente.tipo_persona == 2 %}selected{% elif form.tipo_persona == '2' %}selected{% endif %}>Persona Moral</option>
+							</select>
+						</div>
+
+						<!-- Datos geográficos -->
+						<div class="col-md-6 mb-3">
+							<label class="form-label">Entidad Federativa <span class="text-danger">*</span></label>
+							<select id="estado_select" name="estado_id" class="form-control" required>
+								<option value="">-- Seleccione --</option>
+								{% for e in estados %}
+								<option value="{{ e.claveEdo }}" data-nombre="{{ e.estado }}" 
+										{% if edit_mode and cliente.estado_id == e.claveEdo %}selected{% elif form.estado_id == e.claveEdo|stringformat:"s" %}selected{% endif %}>
+									{{ e.estado }}
+								</option>
+								{% endfor %}
+							</select>
+							<input type="hidden" name="estado_nombre" id="estado_nombre" 
+								   value="{% if edit_mode %}{{ cliente.estado_nombre }}{% else %}{{ form.estado_nombre }}{% endif %}" />
+						</div>
+
+						<div class="col-md-6 mb-3">
+							<label class="form-label">Código Postal <span class="text-danger">*</span></label>
+							<input type="text" id="cp_input" name="codigo_postal" class="form-control" 
+								   value="{% if edit_mode %}{{ cliente.codigo_postal }}{% else %}{{ form.codigo_postal }}{% endif %}" 
+								   required maxlength="5" pattern="[0-9]{5}" />
+						</div>
+
+						<div class="col-md-6 mb-3">
+							<label class="form-label">Municipio</label>
+							<select id="municipio_select" name="municipio_id" class="form-control" disabled>
+								<option value="">-- Ingrese CP primero --</option>
+							</select>
+							<input type="hidden" name="municipio_nombre" id="municipio_nombre" 
+								   value="{% if edit_mode %}{{ cliente.municipio_nombre }}{% else %}{{ form.municipio_nombre }}{% endif %}" />
+						</div>
+
+						<div class="col-md-6 mb-3">
+							<label class="form-label">Colonia</label>
+							<select id="colonia_select" name="colonia_id" class="form-control" disabled>
+								<option value="">-- Ingrese CP primero --</option>
+							</select>
+							<input type="hidden" name="colonia_nombre" id="colonia_nombre" 
+								   value="{% if edit_mode %}{{ cliente.colonia_nombre }}{% else %}{{ form.colonia_nombre }}{% endif %}" />
+						</div>
+
+						<div class="col-md-6 mb-3">
+							<label class="form-label">Localidad</label>
+							<input type="text" name="localidad" class="form-control" 
+								   value="{% if edit_mode %}{{ cliente.localidad }}{% else %}{{ form.localidad }}{% endif %}" 
+								   maxlength="8" />
+						</div>
+
+						<!-- Campos solo para persona física -->
+						<div class="col-md-6 mb-3" id="sexo_field">
+							<label class="form-label">Sexo</label>
+							<select name="sexo" class="form-control">
+								<option value="">-- Seleccione --</option>
+								<option value="H" {% if edit_mode and cliente.sexo == 'H' %}selected{% elif form.sexo == 'H' %}selected{% endif %}>Hombre</option>
+								<option value="M" {% if edit_mode and cliente.sexo == 'M' %}selected{% elif form.sexo == 'M' %}selected{% endif %}>Mujer</option>
+							</select>
+							<small class="form-text text-muted">Solo para persona física</small>
+						</div>
+
+						<div class="col-md-6 mb-3" id="edad_field">
+							<label class="form-label">Edad</label>
+							<input type="number" name="edad" class="form-control" 
+								   value="{% if edit_mode %}{{ cliente.edad }}{% else %}{{ form.edad }}{% endif %}" 
+								   min="0" max="999" />
+							<small class="form-text text-muted">Solo para persona física (máx. 3 dígitos)</small>
+						</div>
+					</div>
+
+					<div class="d-flex gap-2 mt-3">
+						<button type="submit" class="btn btn-primary">
+							{% if edit_mode %}Actualizar{% else %}Crear{% endif %} Cliente
+						</button>
+						<a href="{% url 'redeco_frontend:clientes_list' %}" class="btn btn-secondary">Cancelar</a>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+(function() {
+	const API_BASE = 'https://api.condusef.gob.mx';
+	
+	const estadoSelect = document.getElementById('estado_select');
+	const cpInput = document.getElementById('cp_input');
+	const municipioSelect = document.getElementById('municipio_select');
+	const coloniaSelect = document.getElementById('colonia_select');
+	const tipoPersonaSelect = document.getElementById('tipo_persona');
+	const sexoField = document.getElementById('sexo_field');
+	const edadField = document.getElementById('edad_field');
+	
+	// Guardar nombre del estado seleccionado
+	estadoSelect.addEventListener('change', function() {
+		const selectedOption = this.options[this.selectedIndex];
+		document.getElementById('estado_nombre').value = selectedOption.getAttribute('data-nombre') || '';
+	});
+	
+	// Mostrar/ocultar campos según tipo de persona
+	function togglePersonaFields() {
+		const tipoPersona = tipoPersonaSelect.value;
+		if (tipoPersona === '2') {
+			// Persona Moral - ocultar sexo y edad
+			sexoField.style.display = 'none';
+			edadField.style.display = 'none';
+			document.querySelector('select[name="sexo"]').value = '';
+			document.querySelector('input[name="edad"]').value = '';
+		} else {
+			// Persona Física - mostrar sexo y edad
+			sexoField.style.display = 'block';
+			edadField.style.display = 'block';
+		}
+	}
+	
+	tipoPersonaSelect.addEventListener('change', togglePersonaFields);
+	togglePersonaFields(); // Ejecutar al cargar
+	
+	// Cargar municipios y colonias cuando se ingresa un CP válido
+	cpInput.addEventListener('input', function() {
+		const cp = this.value.trim();
+		
+		municipioSelect.innerHTML = '<option value="">-- Ingrese CP primero --</option>';
+		municipioSelect.disabled = true;
+		coloniaSelect.innerHTML = '<option value="">-- Ingrese CP primero --</option>';
+		coloniaSelect.disabled = true;
+		
+		if (cp.length !== 5 || !/^\d{5}$/.test(cp)) {
+			return;
+		}
+		
+		municipioSelect.innerHTML = '<option value="">-- Cargando... --</option>';
+		coloniaSelect.innerHTML = '<option value="">-- Cargando... --</option>';
+		
+		loadMunicipios(cp);
+		loadColonias(cp);
+	});
+	
+	async function loadMunicipios(cp) {
+		try {
+			if (!estadoSelect.value) {
+				municipioSelect.innerHTML = '<option value="">Seleccione estado primero</option>';
+				return;
+			}
+			const url = `${API_BASE}/sepomex/municipios/?estado_id=${encodeURIComponent(estadoSelect.value)}&cp=${encodeURIComponent(cp)}`;
+			const response = await fetch(url);
+			if (!response.ok) throw new Error('Error al cargar municipios');
+			
+			const data = await response.json();
+			municipioSelect.innerHTML = '<option value="">-- Seleccione Municipio --</option>';
+			
+			let municipios = data.municipios || data || [];
+			
+			municipios.forEach(mun => {
+				const option = document.createElement('option');
+				const text = mun.nombre || mun.municipio || mun.name || '';
+				option.value = mun.municipioId || mun.municipio_id || mun.id || '';
+				option.textContent = text;
+				option.setAttribute('data-nombre', text);
+				municipioSelect.appendChild(option);
+			});
+			
+			municipioSelect.disabled = false;
+			
+			{% if edit_mode %}
+			if ('{{ cliente.municipio_id }}') {
+				municipioSelect.value = '{{ cliente.municipio_id }}';
+			}
+			{% endif %}
+		} catch (error) {
+			console.error('Error cargando municipios:', error);
+			municipioSelect.innerHTML = '<option value="">Error al cargar municipios</option>';
+		}
+	}
+	
+	async function loadColonias(cp) {
+		try {
+			const response = await fetch(`${API_BASE}/sepomex/colonias/?cp=${cp}`);
+			if (!response.ok) throw new Error('Error al cargar colonias');
+			
+			const data = await response.json();
+			coloniaSelect.innerHTML = '<option value="">-- Seleccione Colonia --</option>';
+			
+			let colonias = data.colonias || data || [];
+			
+			colonias.forEach(col => {
+				const option = document.createElement('option');
+				const text = col.colonia || col.nombre || col.name || '';
+				option.value = col.coloniaId || col.colonia_id || col.id || '';
+				option.textContent = text;
+				option.setAttribute('data-nombre', text);
+				coloniaSelect.appendChild(option);
+			});
+			
+			coloniaSelect.disabled = false;
+			
+			{% if edit_mode %}
+			if ('{{ cliente.colonia_id }}') {
+				coloniaSelect.value = '{{ cliente.colonia_id }}';
+			}
+			{% endif %}
+		} catch (error) {
+			console.error('Error cargando colonias:', error);
+			coloniaSelect.innerHTML = '<option value="">Error al cargar colonias</option>';
+		}
+	}
+	
+	// Guardar nombres de municipio y colonia seleccionados
+	municipioSelect.addEventListener('change', function() {
+		const selectedOption = this.options[this.selectedIndex];
+		document.getElementById('municipio_nombre').value = selectedOption.getAttribute('data-nombre') || '';
+	});
+	
+	coloniaSelect.addEventListener('change', function() {
+		const selectedOption = this.options[this.selectedIndex];
+		document.getElementById('colonia_nombre').value = selectedOption.getAttribute('data-nombre') || '';
+	});
+	
+	// Si estamos en modo edición y hay CP, cargar datos
+	{% if edit_mode and cliente.codigo_postal %}
+	if ('{{ cliente.codigo_postal }}'.length === 5) {
+		loadMunicipios('{{ cliente.codigo_postal }}');
+		loadColonias('{{ cliente.codigo_postal }}');
+	}
+	{% endif %}
+})();
+</script>
+{% endblock %}

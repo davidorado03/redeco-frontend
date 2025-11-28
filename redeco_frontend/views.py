@@ -1,7 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from functools import wraps
 from . import services
+from .models import Cliente
 
 
 def require_token(view_func):
@@ -713,3 +714,195 @@ def create_queja(request):
     }
 
     return render(request, 'create_queja.html', context)
+
+
+# ============================================================================
+# CRUD de Clientes (Catálogo)
+# ============================================================================
+
+@require_http_methods(['GET'])
+@require_token
+def clientes_list(request):
+    """Lista de todos los clientes."""
+    clientes = Cliente.objects.all()
+    context = {
+        'clientes': clientes,
+    }
+    return render(request, 'clientes_list.html', context)
+
+
+@require_http_methods(['GET', 'POST'])
+@require_token
+def clientes_create(request):
+    """Crear un nuevo cliente."""
+    token = request.session.get('redeco_token')
+    error = None
+    success = None
+    form_data = {}
+    
+    # Cargar catálogos necesarios
+    estados = []
+    try:
+        estados_response = services.call_public_endpoint('sepomex/estados/')
+        estados = estados_response.get('estados', [])
+    except services.RedeCoAPIError as exc:
+        error = f"Error al cargar estados: {str(exc)}"
+    
+    if request.method == 'POST':
+        # Recoger datos del formulario
+        nombre = request.POST.get('nombre', '').strip()
+        rfc = request.POST.get('rfc', '').strip().upper()
+        tipo_persona = request.POST.get('tipo_persona', '').strip()
+        estado_id = request.POST.get('estado_id', '').strip()
+        codigo_postal = request.POST.get('codigo_postal', '').strip()
+        municipio_id = request.POST.get('municipio_id', '').strip()
+        colonia_id = request.POST.get('colonia_id', '').strip()
+        localidad = request.POST.get('localidad', '').strip()
+        sexo = request.POST.get('sexo', '').strip()
+        edad = request.POST.get('edad', '').strip()
+        
+        # Nombres para mostrar
+        estado_nombre = request.POST.get('estado_nombre', '').strip()
+        municipio_nombre = request.POST.get('municipio_nombre', '').strip()
+        colonia_nombre = request.POST.get('colonia_nombre', '').strip()
+        
+        # Guardar datos para repoblar formulario en caso de error
+        form_data = {
+            'nombre': nombre,
+            'rfc': rfc,
+            'tipo_persona': tipo_persona,
+            'estado_id': estado_id,
+            'codigo_postal': codigo_postal,
+            'municipio_id': municipio_id,
+            'colonia_id': colonia_id,
+            'localidad': localidad,
+            'sexo': sexo,
+            'edad': edad,
+            'estado_nombre': estado_nombre,
+            'municipio_nombre': municipio_nombre,
+            'colonia_nombre': colonia_nombre,
+        }
+        
+        # Validaciones
+        if not all([nombre, rfc, tipo_persona, estado_id, codigo_postal]):
+            error = 'Los campos marcados con * son obligatorios.'
+        elif Cliente.objects.filter(rfc=rfc).exists():
+            error = f'Ya existe un cliente con el RFC {rfc}.'
+        else:
+            try:
+                cliente = Cliente(
+                    nombre=nombre,
+                    rfc=rfc,
+                    tipo_persona=int(tipo_persona),
+                    estado_id=int(estado_id),
+                    estado_nombre=estado_nombre,
+                    codigo_postal=codigo_postal,
+                    municipio_id=int(municipio_id) if municipio_id else None,
+                    municipio_nombre=municipio_nombre,
+                    colonia_id=int(colonia_id) if colonia_id else None,
+                    colonia_nombre=colonia_nombre,
+                    localidad=localidad,
+                    sexo=sexo if sexo else None,
+                    edad=int(edad) if edad else None,
+                )
+                cliente.full_clean()  # Ejecutar validaciones del modelo
+                cliente.save()
+                success = f'Cliente {nombre} creado exitosamente.'
+                form_data = {}  # Limpiar formulario
+            except Exception as e:
+                error = f'Error al crear cliente: {str(e)}'
+    
+    context = {
+        'error': error,
+        'success': success,
+        'estados': estados,
+        'form': form_data,
+    }
+    return render(request, 'clientes_form.html', context)
+
+
+@require_http_methods(['GET', 'POST'])
+@require_token
+def clientes_edit(request, cliente_id):
+    """Editar un cliente existente."""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    token = request.session.get('redeco_token')
+    error = None
+    success = None
+    
+    # Cargar catálogos necesarios
+    estados = []
+    try:
+        estados_response = services.call_public_endpoint('sepomex/estados/')
+        estados = estados_response.get('estados', [])
+    except services.RedeCoAPIError as exc:
+        error = f"Error al cargar estados: {str(exc)}"
+    
+    if request.method == 'POST':
+        # Recoger datos del formulario
+        nombre = request.POST.get('nombre', '').strip()
+        rfc = request.POST.get('rfc', '').strip().upper()
+        tipo_persona = request.POST.get('tipo_persona', '').strip()
+        estado_id = request.POST.get('estado_id', '').strip()
+        codigo_postal = request.POST.get('codigo_postal', '').strip()
+        municipio_id = request.POST.get('municipio_id', '').strip()
+        colonia_id = request.POST.get('colonia_id', '').strip()
+        localidad = request.POST.get('localidad', '').strip()
+        sexo = request.POST.get('sexo', '').strip()
+        edad = request.POST.get('edad', '').strip()
+        
+        # Nombres para mostrar
+        estado_nombre = request.POST.get('estado_nombre', '').strip()
+        municipio_nombre = request.POST.get('municipio_nombre', '').strip()
+        colonia_nombre = request.POST.get('colonia_nombre', '').strip()
+        
+        # Validaciones
+        if not all([nombre, rfc, tipo_persona, estado_id, codigo_postal]):
+            error = 'Los campos marcados con * son obligatorios.'
+        elif Cliente.objects.filter(rfc=rfc).exclude(id=cliente_id).exists():
+            error = f'Ya existe otro cliente con el RFC {rfc}.'
+        else:
+            try:
+                cliente.nombre = nombre
+                cliente.rfc = rfc
+                cliente.tipo_persona = int(tipo_persona)
+                cliente.estado_id = int(estado_id)
+                cliente.estado_nombre = estado_nombre
+                cliente.codigo_postal = codigo_postal
+                cliente.municipio_id = int(municipio_id) if municipio_id else None
+                cliente.municipio_nombre = municipio_nombre
+                cliente.colonia_id = int(colonia_id) if colonia_id else None
+                cliente.colonia_nombre = colonia_nombre
+                cliente.localidad = localidad
+                cliente.sexo = sexo if sexo else None
+                cliente.edad = int(edad) if edad else None
+                
+                cliente.full_clean()  # Ejecutar validaciones del modelo
+                cliente.save()
+                success = f'Cliente {nombre} actualizado exitosamente.'
+            except Exception as e:
+                error = f'Error al actualizar cliente: {str(e)}'
+    
+    context = {
+        'error': error,
+        'success': success,
+        'estados': estados,
+        'cliente': cliente,
+        'edit_mode': True,
+    }
+    return render(request, 'clientes_form.html', context)
+
+
+@require_http_methods(['POST'])
+@require_token
+def clientes_delete(request, cliente_id):
+    """Eliminar un cliente."""
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    nombre = cliente.nombre
+    try:
+        cliente.delete()
+        request.session['delete_success'] = f'Cliente {nombre} eliminado exitosamente.'
+    except Exception as e:
+        request.session['delete_error'] = f'Error al eliminar cliente: {str(e)}'
+    
+    return redirect('redeco_frontend:clientes_list')

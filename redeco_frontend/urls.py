@@ -17,4 +17,10 @@ urlpatterns = [
     path('quejas/crear/', views.create_queja, name='create_queja'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    
+    # CRUD de Clientes
+    path('clientes/', views.clientes_list, name='clientes_list'),
+    path('clientes/crear/', views.clientes_create, name='clientes_create'),
+    path('clientes/<int:cliente_id>/editar/', views.clientes_edit, name='clientes_edit'),
+    path('clientes/<int:cliente_id>/eliminar/', views.clientes_delete, name='clientes_delete'),
 ]
