@@ -164,7 +164,7 @@
 									<i class="bi bi-plus-circle"></i> Crear Nuevo Cliente
 								</a>
 								<a href="{% url 'redeco_frontend:clientes_list' %}" class="btn btn-outline-primary btn-sm" target="_blank">
-									<i class="bi bi-list-ul"></i> Ver Catálogo
+									<i class="bi bi-list-ul"></i> Ver Catálogo de clientes
 								</a>
 							</div>
 						</div>
@@ -186,7 +186,7 @@
 							<div class="col-md-3 mb-3">
 								<label class="form-label">Entidad Federativa <span class="text-danger">*</span></label>
 								<input type="text" id="estado_nombre_display" class="form-control" readonly style="display:none;">
-								<select id="estado_id_geo" name="estado_id" class="form-control" required>
+								<select id="estado_id_geo" name="estado_id" class="form-control">
 									<option value="">-- Seleccione --</option>
 									{% for e in estados %}
 									<option value="{{ e.claveEdo }}">{{ e.estado }}</option>
@@ -197,14 +197,12 @@
 							<div class="col-md-3 mb-3">
 								<label class="form-label">Código Postal <span class="text-danger">*</span></label>
 								<input type="text" id="cp_input" name="cp" class="form-control" maxlength="5" pattern="[0-9]{5}" value="{{ form.cp }}" required />
-								<small class="form-text text-muted">5 dígitos</small>
 							</div>
 
 							<div class="col-md-3 mb-3">
 								<label class="form-label">Municipio <span class="text-danger">*</span></label>
 								<input type="text" id="municipio_nombre_display" class="form-control" readonly style="display:none;">
-								<select id="municipio_select" name="municipio" class="form-control" required disabled>
-									<option value="">-- Ingrese CP primero --</option>
+								<select id="municipio_select" name="municipio" class="form-control">
 								</select>
 								<small class="form-text text-muted">Según CP</small>
 							</div>
@@ -212,8 +210,7 @@
 							<div class="col-md-3 mb-3">
 								<label class="form-label">Colonia <span class="text-danger">*</span></label>
 								<input type="text" id="colonia_nombre_display" class="form-control" readonly style="display:none;">
-								<select id="colonia_select" name="colonia" class="form-control" required disabled>
-									<option value="">-- Ingrese CP primero --</option>
+								<select id="colonia_select" name="colonia" class="form-control">
 								</select>
 								<small class="form-text text-muted">Según CP</small>
 							</div>
@@ -221,7 +218,6 @@
 							<div class="col-md-12 mb-3">
 								<label class="form-label">Localidad</label>
 								<input id="localidad_input" name="localidad" class="form-control" maxlength="8" value="{{ form.localidad }}" />
-								<small class="form-text text-muted">Opcional</small>
 							</div>
 						</div>
 					</div>
@@ -240,7 +236,7 @@
 							<div class="col-md-4 mb-3">
 								<label class="form-label">Tipo de persona <span class="text-danger">*</span></label>
 								<input type="text" id="tipo_persona_display" class="form-control" readonly style="display:none;">
-								<select id="tipo_persona_select" name="tipo_persona" class="form-control" required>
+								<select id="tipo_persona_select" name="tipo_persona" class="form-control">
 									<option value="">-- Seleccione --</option>
 									<option value="1">1 - Persona Física</option>
 									<option value="2">2 - Persona Moral</option>
@@ -255,13 +251,11 @@
 									<option value="H">H - Hombre</option>
 									<option value="M">M - Mujer</option>
 								</select>
-								<small class="form-text text-muted">Solo persona física</small>
 							</div>
 
 							<div class="col-md-4 mb-3">
 								<label class="form-label">Edad</label>
 								<input type="number" id="edad_input" name="edad" class="form-control" min="0" max="999" value="{{ form.edad }}" />
-								<small class="form-text text-muted">Solo persona física</small>
 							</div>
 						</div>
 					</div>
@@ -279,13 +273,11 @@
 						<div class="col-md-4 mb-3">
 							<label class="form-label">Fecha de resolución</label>
 							<input type="date" name="fecha_resolucion" class="form-control" value="{{ form.fecha_resolucion }}" />
-							<small class="form-text text-muted">Opcional</small>
 						</div>
 
 						<div class="col-md-4 mb-3">
 							<label class="form-label">Fecha de notificación</label>
 							<input type="date" name="fecha_notificacion" class="form-control" value="{{ form.fecha_notificacion }}" />
-							<small class="form-text text-muted">Opcional</small>
 						</div>
 
 						<div class="col-md-4 mb-3">
@@ -296,7 +288,6 @@
 								<option value="2">2 - Desfavorable</option>
 								<option value="3">3 - Parcialmente favorable</option>
 							</select>
-							<small class="form-text text-muted">Si concluido</small>
 						</div>
 					</div>
 
@@ -313,7 +304,6 @@
 						<div class="col-md-6 mb-3">
 							<label class="form-label">Número de penalizaciones</label>
 							<input type="number" name="num_penal" class="form-control" min="0" max="9999" value="{{ form.num_penal }}" />
-							<small class="form-text text-muted">Opcional</small>
 						</div>
 
 						<div class="col-md-6 mb-3">
@@ -324,7 +314,6 @@
 								<option value="2">2 - Contractuales - Reasignación de cartera</option>
 								<option value="3">3 - Económicas - Multa</option>
 							</select>
-							<small class="form-text text-muted">Opcional</small>
 						</div>
 					</div>
 
