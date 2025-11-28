@@ -475,6 +475,7 @@ def create_queja(request):
     niveles = []
     estados = []
     productos = []
+    clientes = Cliente.objects.all().order_by('nombre')  # Agregar catálogo de clientes
 
     try:
         med_resp = services.call_public_endpoint('catalogos/medio-recepcion')
@@ -568,17 +569,45 @@ def create_queja(request):
         causas_id = (request.POST.get('causas_id') or '').strip()
         pori = (request.POST.get('pori') or '').strip().upper()
         estatus = (request.POST.get('estatus') or '').strip()
-        estado_id = (request.POST.get('estado_id') or '').strip()
-        municipio = (request.POST.get('municipio') or '').strip()
-        localidad = (request.POST.get('localidad') or '').strip()
-        colonia = (request.POST.get('colonia') or '').strip()
-        # Filtrar valores "undefined" que pueden venir del JavaScript
-        if colonia.lower() == 'undefined':
-            colonia = ''
-        cp = (request.POST.get('cp') or '').strip()
-        tipo_persona = (request.POST.get('tipo_persona') or '').strip()
-        sexo = (request.POST.get('sexo') or '').strip()
-        edad = (request.POST.get('edad') or '').strip()
+        
+        # Datos del cliente - pueden venir del catálogo o manualmente
+        cliente_id = (request.POST.get('cliente_id') or '').strip()
+        if cliente_id:
+            # Si se seleccionó un cliente del catálogo, usar sus datos
+            try:
+                cliente = Cliente.objects.get(id=cliente_id)
+                estado_id = str(cliente.estado_id)
+                municipio = str(cliente.municipio_id) if cliente.municipio_id else ''
+                colonia = str(cliente.colonia_id) if cliente.colonia_id else ''
+                cp = cliente.codigo_postal
+                localidad = cliente.localidad or ''
+                tipo_persona = str(cliente.tipo_persona)
+                sexo = cliente.sexo or ''
+                edad = str(cliente.edad) if cliente.edad else ''
+            except Cliente.DoesNotExist:
+                estado_id = (request.POST.get('estado_id') or '').strip()
+                municipio = (request.POST.get('municipio') or '').strip()
+                localidad = (request.POST.get('localidad') or '').strip()
+                colonia = (request.POST.get('colonia') or '').strip()
+                if colonia.lower() == 'undefined':
+                    colonia = ''
+                cp = (request.POST.get('cp') or '').strip()
+                tipo_persona = (request.POST.get('tipo_persona') or '').strip()
+                sexo = (request.POST.get('sexo') or '').strip()
+                edad = (request.POST.get('edad') or '').strip()
+        else:
+            # Datos ingresados manualmente
+            estado_id = (request.POST.get('estado_id') or '').strip()
+            municipio = (request.POST.get('municipio') or '').strip()
+            localidad = (request.POST.get('localidad') or '').strip()
+            colonia = (request.POST.get('colonia') or '').strip()
+            if colonia.lower() == 'undefined':
+                colonia = ''
+            cp = (request.POST.get('cp') or '').strip()
+            tipo_persona = (request.POST.get('tipo_persona') or '').strip()
+            sexo = (request.POST.get('sexo') or '').strip()
+            edad = (request.POST.get('edad') or '').strip()
+        
         fecha_resolucion = (request.POST.get('fecha_resolucion') or '').strip()
         fecha_notificacion = (request.POST.get('fecha_notificacion') or '').strip()
         respuesta = (request.POST.get('respuesta') or '').strip()
@@ -708,6 +737,7 @@ def create_queja(request):
         'niveles': niveles,
         'estados': estados,
         'productos': productos,
+        'clientes': clientes,
         'payload_text': payload_sent,
         'current_month': current_month,
         'form': form,

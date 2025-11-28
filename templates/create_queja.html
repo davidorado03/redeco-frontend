@@ -111,8 +111,53 @@
 						</div>
 
 						<!-- DATOS GEOGRÁFICOS REQUERIDOS -->
+						<div class="col-12 mb-4">
+							<hr>
+							<h6 class="text-primary">Datos del Usuario</h6>
+							<div class="alert alert-info">
+								<i class="bi bi-info-circle"></i> Puede seleccionar un cliente existente o ingresar los datos manualmente
+							</div>
+						</div>
+
+						<div class="col-md-6 mb-3">
+							<label class="form-label">Seleccionar Cliente del Catálogo</label>
+							<select id="cliente_select" class="form-control">
+								<option value="">-- Ingresar datos manualmente --</option>
+								{% for c in clientes %}
+								<option value="{{ c.id }}" 
+									data-tipo="{{ c.tipo_persona }}"
+									data-estado-id="{{ c.estado_id }}"
+									data-estado-nombre="{{ c.estado_nombre }}"
+									data-cp="{{ c.codigo_postal }}"
+									data-municipio-id="{{ c.municipio_id|default:'' }}"
+									data-municipio-nombre="{{ c.municipio_nombre|default:'' }}"
+									data-colonia-id="{{ c.colonia_id|default:'' }}"
+									data-colonia-nombre="{{ c.colonia_nombre|default:'' }}"
+									data-localidad="{{ c.localidad|default:'' }}"
+									data-sexo="{{ c.sexo|default:'' }}"
+									data-edad="{{ c.edad|default:'' }}">
+									{{ c.nombre }} - {{ c.rfc }}
+								</option>
+								{% endfor %}
+							</select>
+							<small class="form-text text-muted">Seleccione un cliente existente para autocompletar</small>
+						</div>
+
+						<div class="col-md-6 mb-3">
+							<label class="form-label">&nbsp;</label>
+							<div>
+								<a href="{% url 'redeco_frontend:clientes_list' %}" class="btn btn-outline-primary btn-sm" target="_blank">
+									<i class="bi bi-pencil-square"></i> Ir al Catálogo de Clientes
+								</a>
+							</div>
+							<small class="form-text text-muted">Abrir en nueva pestaña para modificar clientes</small>
+						</div>
+
+						<input type="hidden" id="cliente_id_hidden" name="cliente_id" value="">
+
 						<div class="col-md-3 mb-3">
 							<label class="form-label">Entidad Federativa <span class="text-danger">*</span></label>
+							<input type="text" id="estado_nombre_display" class="form-control" readonly style="display:none;">
 							<select id="estado_id_geo" name="estado_id" class="form-control" required>
 								<option value="">-- Seleccione --</option>
 								{% for e in estados %}
@@ -125,11 +170,12 @@
 						<div class="col-md-3 mb-3">
 							<label class="form-label">Código Postal <span class="text-danger">*</span></label>
 							<input type="text" id="cp_input" name="cp" class="form-control" maxlength="5" pattern="[0-9]{5}" value="{{ form.cp }}" required />
-							<small class="form-text text-muted">Ingrese el código postal (5 dígitos)</small>
+							<small class="form-text text-muted">5 dígitos</small>
 						</div>
 
 						<div class="col-md-3 mb-3">
 							<label class="form-label">Municipio <span class="text-danger">*</span></label>
+							<input type="text" id="municipio_nombre_display" class="form-control" readonly style="display:none;">
 							<select id="municipio_select" name="municipio" class="form-control" required disabled>
 								<option value="">-- Ingrese CP primero --</option>
 							</select>
@@ -138,6 +184,7 @@
 
 						<div class="col-md-3 mb-3">
 							<label class="form-label">Colonia <span class="text-danger">*</span></label>
+							<input type="text" id="colonia_nombre_display" class="form-control" readonly style="display:none;">
 							<select id="colonia_select" name="colonia" class="form-control" required disabled>
 								<option value="">-- Ingrese CP primero --</option>
 							</select>
@@ -146,14 +193,15 @@
 
 						<div class="col-md-12 mb-3">
 							<label class="form-label">Localidad</label>
-							<input name="localidad" class="form-control" maxlength="8" value="{{ form.localidad }}" />
+							<input id="localidad_input" name="localidad" class="form-control" maxlength="8" value="{{ form.localidad }}" />
 						</div>
 						</div>
 
 						<!-- DATOS DEL USUARIO -->
 						<div class="col-md-4 mb-3">
 							<label class="form-label">Tipo de persona <span class="text-danger">*</span></label>
-							<select name="tipo_persona" class="form-control" required>
+							<input type="text" id="tipo_persona_display" class="form-control" readonly style="display:none;">
+							<select id="tipo_persona_select" name="tipo_persona" class="form-control" required>
 								<option value="">-- Seleccione --</option>
 								<option value="1">1 - Persona Física</option>
 								<option value="2">2 - Persona Moral</option>
@@ -163,7 +211,8 @@
 
 						<div class="col-md-4 mb-3">
 							<label class="form-label">Sexo</label>
-							<select name="sexo" class="form-control">
+							<input type="text" id="sexo_display" class="form-control" readonly style="display:none;">
+							<select id="sexo_select" name="sexo" class="form-control">
 								<option value="">-- --</option>
 								<option value="H">H - Hombre</option>
 								<option value="M">M - Mujer</option>
@@ -173,7 +222,7 @@
 
 						<div class="col-md-4 mb-3">
 							<label class="form-label">Edad</label>
-							<input type="number" name="edad" class="form-control" min="0" max="999" value="{{ form.edad }}" />
+							<input type="number" id="edad_input" name="edad" class="form-control" min="0" max="999" value="{{ form.edad }}" />
 							<small class="form-text text-muted">Solo para persona física (máx. 3 dígitos)</small>
 						</div>
 
@@ -241,10 +290,130 @@
 (function() {
 	const API_BASE = 'https://api.condusef.gob.mx';
 	
+	// Elementos del cliente
+	const clienteSelect = document.getElementById('cliente_select');
+	const clienteIdHidden = document.getElementById('cliente_id_hidden');
+	
+	// Elementos de datos geográficos
 	const estadoSelect = document.getElementById('estado_id_geo');
+	const estadoDisplay = document.getElementById('estado_nombre_display');
 	const cpInput = document.getElementById('cp_input');
 	const municipioSelect = document.getElementById('municipio_select');
+	const municipioDisplay = document.getElementById('municipio_nombre_display');
 	const coloniaSelect = document.getElementById('colonia_select');
+	const coloniaDisplay = document.getElementById('colonia_nombre_display');
+	const localidadInput = document.getElementById('localidad_input');
+	
+	// Elementos de datos personales
+	const tipoPersonaSelect = document.getElementById('tipo_persona_select');
+	const tipoPersonaDisplay = document.getElementById('tipo_persona_display');
+	const sexoSelect = document.getElementById('sexo_select');
+	const sexoDisplay = document.getElementById('sexo_display');
+	const edadInput = document.getElementById('edad_input');
+	
+	// Función para habilitar/deshabilitar campos
+	function setFieldsReadonly(readonly) {
+		if (readonly) {
+			// Mostrar campos de solo lectura
+			estadoDisplay.style.display = 'block';
+			estadoSelect.style.display = 'none';
+			municipioDisplay.style.display = 'block';
+			municipioSelect.style.display = 'none';
+			coloniaDisplay.style.display = 'block';
+			coloniaSelect.style.display = 'none';
+			tipoPersonaDisplay.style.display = 'block';
+			tipoPersonaSelect.style.display = 'none';
+			sexoDisplay.style.display = 'block';
+			sexoSelect.style.display = 'none';
+			
+			cpInput.readOnly = true;
+			localidadInput.readOnly = true;
+			edadInput.readOnly = true;
+		} else {
+			// Mostrar campos editables
+			estadoDisplay.style.display = 'none';
+			estadoSelect.style.display = 'block';
+			municipioDisplay.style.display = 'none';
+			municipioSelect.style.display = 'block';
+			coloniaDisplay.style.display = 'none';
+			coloniaSelect.style.display = 'block';
+			tipoPersonaDisplay.style.display = 'none';
+			tipoPersonaSelect.style.display = 'block';
+			sexoDisplay.style.display = 'none';
+			sexoSelect.style.display = 'block';
+			
+			cpInput.readOnly = false;
+			localidadInput.readOnly = false;
+			edadInput.readOnly = false;
+		}
+	}
+	
+	// Manejar selección de cliente
+	clienteSelect.addEventListener('change', function() {
+		const option = this.options[this.selectedIndex];
+		const clienteId = option.value;
+		
+		if (clienteId) {
+			// Cliente seleccionado - cargar datos
+			clienteIdHidden.value = clienteId;
+			
+			const tipoPersona = option.dataset.tipo;
+			const estadoId = option.dataset.estadoId;
+			const estadoNombre = option.dataset.estadoNombre;
+			const cp = option.dataset.cp;
+			const municipioId = option.dataset.municipioId;
+			const municipioNombre = option.dataset.municipioNombre;
+			const coloniaId = option.dataset.coloniaId;
+			const coloniaNombre = option.dataset.coloniaNombre;
+			const localidad = option.dataset.localidad;
+			const sexo = option.dataset.sexo;
+			const edad = option.dataset.edad;
+			
+			// Poblar campos de solo lectura
+			estadoDisplay.value = estadoNombre;
+			estadoSelect.value = estadoId;
+			cpInput.value = cp;
+			municipioDisplay.value = municipioNombre || '';
+			coloniaDisplay.value = coloniaNombre || '';
+			localidadInput.value = localidad || '';
+			tipoPersonaDisplay.value = tipoPersona === '1' ? '1 - Persona Física' : '2 - Persona Moral';
+			tipoPersonaSelect.value = tipoPersona;
+			sexoDisplay.value = sexo === 'H' ? 'H - Hombre' : sexo === 'M' ? 'M - Mujer' : '';
+			sexoSelect.value = sexo || '';
+			edadInput.value = edad || '';
+			
+			// Configurar selects ocultos para enviar valores correctos
+			if (municipioId) {
+				municipioSelect.innerHTML = `<option value="${municipioId}" selected>${municipioNombre}</option>`;
+				municipioSelect.disabled = false;
+			}
+			if (coloniaId) {
+				coloniaSelect.innerHTML = `<option value="${coloniaId}" selected>${coloniaNombre}</option>`;
+				coloniaSelect.disabled = false;
+			}
+			
+			setFieldsReadonly(true);
+		} else {
+			// Entrada manual - limpiar y habilitar campos
+			clienteIdHidden.value = '';
+			estadoDisplay.value = '';
+			cpInput.value = '';
+			municipioDisplay.value = '';
+			coloniaDisplay.value = '';
+			localidadInput.value = '';
+			tipoPersonaDisplay.value = '';
+			sexoDisplay.value = '';
+			edadInput.value = '';
+			
+			setFieldsReadonly(false);
+		}
+	});
+	
+	// Inicializar en modo editable
+	setFieldsReadonly(false);
+	
+	// Elementos ya declarados arriba, no redeclarar
+	// const estadoSelect, cpInput, municipioSelect, coloniaSelect ya existen
 
 	// Valores iniciales enviados desde el servidor para re-hidratar el formulario tras error
 	const initial = {
@@ -427,9 +596,8 @@
 	if (poriSelect && initial.pori) poriSelect.value = initial.pori;
 	const estatusSelect = document.querySelector('select[name="estatus"]');
 	if (estatusSelect && initial.estatus) estatusSelect.value = initial.estatus;
-	const tipoPersonaSelect = document.querySelector('select[name="tipo_persona"]');
+	// tipoPersonaSelect y sexoSelect ya declarados arriba
 	if (tipoPersonaSelect && initial.tipo_persona) tipoPersonaSelect.value = initial.tipo_persona;
-	const sexoSelect = document.querySelector('select[name="sexo"]');
 	if (sexoSelect && initial.sexo) sexoSelect.value = initial.sexo;
 	const respuestaSelect = document.querySelector('select[name="respuesta"]');
 	if (respuestaSelect && initial.respuesta) respuestaSelect.value = initial.respuesta;
