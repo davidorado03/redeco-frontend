@@ -536,18 +536,28 @@ def reune_consultas(request):
                     if form.get('consultas_fec_aten'):
                         fec_aten = datetime.strptime(form['consultas_fec_aten'], '%Y-%m-%d').strftime('%d/%m/%Y')
                         payload[0]["ConsultasFecAten"] = fec_aten
+                    else:
+                        payload[0]["ConsultasFecAten"] = None  # null sin comillas
                     
                     if form.get('consultas_cat_nivel_aten_id'):
                         payload[0]["ConsultascatnivelatenId"] = int(form['consultas_cat_nivel_aten_id'])
+                    else:
+                        payload[0]["ConsultascatnivelatenId"] = None  # null sin comillas
                     
                     if form.get('consultas_cp'):
                         payload[0]["ConsultasCP"] = int(form['consultas_cp'])
+                    else:
+                        payload[0]["ConsultasCP"] = None  # null sin comillas
                     
                     if form.get('consultas_loc_id'):
                         payload[0]["ConsultasLocId"] = int(form['consultas_loc_id'])
+                    else:
+                        payload[0]["ConsultasLocId"] = None  # null sin comillas
                     
                     if form.get('consultas_col_id'):
                         payload[0]["ConsultasColId"] = int(form['consultas_col_id'])
+                    else:
+                        payload[0]["ConsultasColId"] = None  # null sin comillas
                     
                     # Call REUNE API
                     result = services.post_reune_consultas_general(token, payload)
@@ -571,6 +581,66 @@ def reune_consultas(request):
         'estados': estados,
     }
     return render(request, 'reune_consultas.html', context)
+
+
+def reune_consultar_folios(request):
+    """Consultar folios de consultas enviados a REUNE."""
+    token = request.session.get('redeco_token')
+    result = None
+    error = None
+    page = request.GET.get('page', '1')
+    
+    if not token:
+        error = 'Token no disponible. Genera un token desde la página principal.'
+    else:
+        try:
+            # Consultar total o página específica
+            if page == 'total':
+                result = services.get_reune_consultas_total(token)
+            else:
+                result = services.get_reune_consultas_page(token, page)
+        except services.RedeCoAPIError as exc:
+            error = str(exc)
+    
+    context = {
+        'token': token,
+        'result': result,
+        'error': error,
+        'page': page,
+    }
+    return render(request, 'reune_consultar_folios.html', context)
+
+
+def reune_eliminar_folio(request):
+    """Eliminar un folio de consulta específico de REUNE."""
+    token = request.session.get('redeco_token')
+    result = None
+    error = None
+    folio = ''
+    
+    if request.method == 'POST':
+        if not token:
+            error = 'Token no disponible. Genera un token desde la página principal.'
+        else:
+            folio = request.POST.get('folio', '').strip()
+            
+            if not folio:
+                error = 'Debe ingresar un número de folio.'
+            else:
+                try:
+                    result = services.delete_reune_consulta_folio(token, folio)
+                    if result and not error:
+                        folio = ''  # Clear on success
+                except services.RedeCoAPIError as exc:
+                    error = str(exc)
+    
+    context = {
+        'token': token,
+        'result': result,
+        'error': error,
+        'folio': folio,
+    }
+    return render(request, 'reune_eliminar_folio.html', context)
 
 
 @require_http_methods(['GET', 'POST'])

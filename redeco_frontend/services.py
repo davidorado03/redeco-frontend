@@ -305,6 +305,138 @@ def post_reune_consultas_general(token: str, payload, timeout: int = 15) -> dict
         raise RedeCoAPIError("La API REUNE no retornó un JSON válido en la respuesta")
 
 
+def get_reune_consultas_total(token: str, timeout: int = 15) -> dict:
+    """GET total de consultas enviadas a REUNE.
+    
+    Args:
+        token: JWT token string.
+        timeout: request timeout seconds.
+        
+    Returns:
+        dict: {'total': int, 'paginas': int}
+        
+    Raises:
+        RedeCoAPIError: on errors.
+    """
+    base = getattr(settings, 'REUNE_API_BASE', 'https://api-reune.condusef.gob.mx')
+    url = f"{base.rstrip('/')}/reune/consultas/obtener/consultageneral/total"
+    
+    headers = {
+        'Authorization': token,
+    }
+    
+    try:
+        resp = requests.get(url, headers=headers, timeout=timeout)
+    except requests.Timeout:
+        raise RedeCoAPIError("Timeout al consultar total de folios REUNE.")
+    except requests.ConnectionError:
+        raise RedeCoAPIError(f"Error de conexión: {url}")
+    except requests.RequestException as exc:
+        raise RedeCoAPIError(f"Error al consultar REUNE: {exc}") from exc
+    
+    if resp.status_code == 401:
+        raise RedeCoAPIError("Token inválido o expirado.")
+    elif resp.status_code >= 400:
+        raise RedeCoAPIError(f"API REUNE retornó error {resp.status_code}")
+    
+    try:
+        return resp.json()
+    except ValueError:
+        raise RedeCoAPIError("Respuesta inválida de REUNE")
+
+
+def get_reune_consultas_page(token: str, page: str, timeout: int = 15) -> dict:
+    """GET folios de consultas por página (250k folios por página).
+    
+    Args:
+        token: JWT token string.
+        page: número de página (1, 2, 3, ...).
+        timeout: request timeout seconds.
+        
+    Returns:
+        dict: lista de folios.
+        
+    Raises:
+        RedeCoAPIError: on errors.
+    """
+    base = getattr(settings, 'REUNE_API_BASE', 'https://api-reune.condusef.gob.mx')
+    url = f"{base.rstrip('/')}/reune/consultas/obtener/consultageneral/{page}"
+    
+    headers = {
+        'Authorization': token,
+    }
+    
+    try:
+        resp = requests.get(url, headers=headers, timeout=timeout)
+    except requests.Timeout:
+        raise RedeCoAPIError("Timeout al consultar folios REUNE.")
+    except requests.ConnectionError:
+        raise RedeCoAPIError(f"Error de conexión: {url}")
+    except requests.RequestException as exc:
+        raise RedeCoAPIError(f"Error al consultar REUNE: {exc}") from exc
+    
+    if resp.status_code == 401:
+        raise RedeCoAPIError("Token inválido o expirado.")
+    elif resp.status_code >= 400:
+        raise RedeCoAPIError(f"API REUNE retornó error {resp.status_code}")
+    
+    try:
+        return resp.json()
+    except ValueError:
+        raise RedeCoAPIError("Respuesta inválida de REUNE")
+
+
+def delete_reune_consulta_folio(token: str, folio: str, timeout: int = 15) -> dict:
+    """DELETE un folio de consulta de REUNE.
+    
+    Args:
+        token: JWT token string.
+        folio: número de folio a eliminar.
+        timeout: request timeout seconds.
+        
+    Returns:
+        dict: mensaje de confirmación.
+        
+    Raises:
+        RedeCoAPIError: on errors.
+    """
+    base = getattr(settings, 'REUNE_API_BASE', 'https://api-reune.condusef.gob.mx')
+    url = f"{base.rstrip('/')}/reune/consultas/eliminar/consultageneral"
+    
+    headers = {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+    }
+    
+    payload = {"folio": folio}
+    
+    try:
+        resp = requests.delete(url, headers=headers, json=payload, timeout=timeout)
+    except requests.Timeout:
+        raise RedeCoAPIError("Timeout al eliminar folio REUNE.")
+    except requests.ConnectionError:
+        raise RedeCoAPIError(f"Error de conexión: {url}")
+    except requests.RequestException as exc:
+        raise RedeCoAPIError(f"Error al eliminar folio: {exc}") from exc
+    
+    if resp.status_code == 401:
+        raise RedeCoAPIError("Token inválido o expirado.")
+    elif resp.status_code == 404:
+        raise RedeCoAPIError(f"Folio '{folio}' no encontrado.")
+    elif resp.status_code >= 400:
+        try:
+            data = resp.json()
+            msg = data.get('message') or data.get('error')
+            raise RedeCoAPIError(msg or f"Error {resp.status_code}")
+        except ValueError:
+            raise RedeCoAPIError(f"API REUNE retornó error {resp.status_code}")
+    
+    try:
+        return resp.json()
+    except ValueError:
+        raise RedeCoAPIError("Respuesta inválida de REUNE")
+
+
 def create_queja(token: str, payload, timeout: int = 20) -> dict:
     """POST a REDECO /redeco/quejas para crear una queja.
 

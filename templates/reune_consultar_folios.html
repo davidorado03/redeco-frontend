@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <h2 class="mb-4">Consultar Folios de Consultas REUNE</h2>
+
+    {% if not token %}
+    <div class="alert alert-warning">
+      <strong>Token requerido:</strong> Necesitas generar un token desde la <a href="{% url 'redeco_frontend:index' %}">página principal</a>.
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="alert alert-danger">
+      <h5 class="alert-heading">
+        <i class="bi bi-exclamation-triangle-fill"></i> Error
+      </h5>
+      <p class="mb-0">{{ error }}</p>
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Opciones de Consulta</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <a href="?page=total" class="btn btn-primary w-100" {% if not token %}disabled{% endif %}>
+              <i class="bi bi-bar-chart"></i> Consultar Total de Folios
+            </a>
+            <small class="form-text text-muted">Ver cifra total y número de páginas</small>
+          </div>
+          <div class="col-md-6 mb-3">
+            <form method="get" class="d-flex gap-2">
+              <input type="number" name="page" class="form-control" placeholder="Número de página" min="1" value="{{ page if page != 'total' else '' }}" required />
+              <button type="submit" class="btn btn-success" {% if not token %}disabled{% endif %}>
+                <i class="bi bi-search"></i> Consultar
+              </button>
+            </form>
+            <small class="form-text text-muted">250,000 folios por página</small>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-3">
+          <a href="{% url 'redeco_frontend:index' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al inicio
+          </a>
+          <a href="{% url 'redeco_frontend:reune_consultas' %}" class="btn btn-outline-primary">
+            <i class="bi bi-plus-circle"></i> Enviar Consultas
+          </a>
+        </div>
+      </div>
+    </div>
+
+    {% if result %}
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">
+          {% if page == 'total' %}
+          Totales
+          {% else %}
+          Folios - Página {{ page }}
+          {% endif %}
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if page == 'total' %}
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <div class="card bg-light">
+                <div class="card-body text-center">
+                  <h3 class="text-primary">{{ result.total|default:'0' }}</h3>
+                  <p class="mb-0">Total de Folios Enviados</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <div class="card bg-light">
+                <div class="card-body text-center">
+                  <h3 class="text-success">{{ result.paginas|default:'0' }}</h3>
+                  <p class="mb-0">Páginas Disponibles</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% if result.paginas and result.paginas > 1 %}
+          <div class="alert alert-info">
+            <strong>Para consultar todos los folios:</strong> Debes consultar cada página individualmente (1 a {{ result.paginas }}).
+          </div>
+          {% endif %}
+        {% else %}
+          <pre class="p-3 bg-light border rounded" style="max-height:600px;overflow:auto;font-size:0.85rem;">{{ result|safe }}</pre>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

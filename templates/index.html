@@ -136,11 +136,20 @@
           <h5 class="card-title mb-0">Envío a REUNE</h5>
         </div>
         <div class="card-body">
-          <p class="text-muted mb-4">Envía consultas al sistema REUNE.</p>
+          <p class="text-muted mb-4">Envía y gestiona consultas al sistema REUNE.</p>
           
           <div class="list-group">
             <a href="{% url 'redeco_frontend:reune_consultas' %}" class="list-group-item list-group-item-action list-group-item-primary">
-              <div class="fw-bold">Consultas Generales REUNE</div>
+              <div class="fw-bold">Enviar Consultas Generales</div>
+              <small class="text-muted">Formulario de envío de consultas</small>
+            </a>
+            <a href="{% url 'redeco_frontend:reune_consultar_folios' %}" class="list-group-item list-group-item-action list-group-item-primary">
+              <div class="fw-bold">Consultar Folios</div>
+              <small class="text-muted">Ver folios enviados (total y por página)</small>
+            </a>
+            <a href="{% url 'redeco_frontend:reune_eliminar_folio' %}" class="list-group-item list-group-item-action list-group-item-primary">
+              <div class="fw-bold">Eliminar Folio</div>
+              <small class="text-muted">Eliminar folios específicos</small>
             </a>
           </div>
         </div>
