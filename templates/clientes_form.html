@@ -4,8 +4,11 @@
 <div class="row">
 	<div class="col-md-10 offset-md-1">
 		<div class="card shadow-sm mt-4">
-			<div class="card-header">
-				<h5 class="text-white">{% if edit_mode %}Editar{% else %}Crear{% endif %} Cliente</h5>
+			<div class="card-header d-flex justify-content-between align-items-center">
+				<h5 class="text-white mb-0">{% if edit_mode %}Editar{% else %}Crear{% endif %} Cliente</h5>
+				<a href="{% url 'redeco_frontend:clientes_list' %}" class="btn btn-sm btn-light">
+					<i class="bi bi-arrow-left-circle"></i> Volver
+				</a>
 			</div>
 			<div class="card-body">
 				{% if error %}
@@ -23,10 +26,10 @@
 				{% endif %}
 
 				<form method="post" id="clienteForm" 
-					  data-edit-mode="{% if edit_mode %}true{% else %}false{% endif %}"
-					  data-municipio-id="{% if edit_mode %}{{ cliente.municipio_id }}{% endif %}"
-					  data-colonia-id="{% if edit_mode %}{{ cliente.colonia_id }}{% endif %}"
-					  data-codigo-postal="{% if edit_mode %}{{ cliente.codigo_postal }}{% endif %}">
+                    data-edit-mode="{% if edit_mode %}true{% else %}false{% endif %}"
+                    data-municipio-id="{% if edit_mode %}{{ cliente.municipio_id }}{% endif %}"
+                    data-colonia-id="{% if edit_mode %}{{ cliente.colonia_id }}{% endif %}"
+                    data-codigo-postal="{% if edit_mode %}{{ cliente.codigo_postal }}{% endif %}">
 					{% csrf_token %}
 					<div class="row">
 						<!-- Datos principales -->
@@ -127,7 +130,7 @@
 						<button type="submit" class="btn btn-primary">
 							{% if edit_mode %}Actualizar{% else %}Crear{% endif %} Cliente
 						</button>
-						<a href="{% url 'redeco_frontend:clientes_list' %}" class="btn btn-secondary">Cancelar</a>
+						<button type="button" class="btn btn-secondary" onclick="confirmarCancelacion()">Cancelar</button>
 					</div>
 				</form>
 			</div>
@@ -136,6 +139,12 @@
 </div>
 
 <script>
+function confirmarCancelacion() {
+	if (confirm('¿Estás seguro de que deseas cancelar? Se perderán los cambios no guardados.')) {
+		window.location.href = "{% url 'redeco_frontend:clientes_list' %}";
+	}
+}
+
 (function() {
 	const API_BASE = 'https://api.condusef.gob.mx';
 	const form = document.getElementById('clienteForm');
