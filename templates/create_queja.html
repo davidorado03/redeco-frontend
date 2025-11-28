@@ -173,7 +173,7 @@
 					<input type="hidden" id="cliente_id_hidden" name="cliente_id" value="">
 
 					<!-- SECCIÓN 3: DATOS GEOGRÁFICOS -->
-					<div class="row mt-4">
+					<div id="seccion_geografica" class="row mt-4" style="display:none;">
 						<div class="col-12 mb-3">
 							<h6 class="text-primary border-bottom pb-2">
 								<i class="bi bi-geo-alt"></i> Ubicación Geográfica
@@ -225,7 +225,7 @@
 					</div>
 
 					<!-- SECCIÓN 4: CARACTERÍSTICAS DEL USUARIO -->
-					<div class="row mt-4">
+					<div id="seccion_caracteristicas" class="row mt-4" style="display:none;">
 						<div class="col-12 mb-3">
 							<h6 class="text-primary border-bottom pb-2">
 								<i class="bi bi-person-badge"></i> Características del Usuario
@@ -406,6 +406,10 @@
 			// Cliente seleccionado - cargar datos
 			clienteIdHidden.value = clienteId;
 			
+			// Mostrar secciones de información del cliente
+			document.getElementById('seccion_geografica').style.display = '';
+			document.getElementById('seccion_caracteristicas').style.display = '';
+			
 			const tipoPersona = option.dataset.tipo;
 			const estadoId = option.dataset.estadoId;
 			const estadoNombre = option.dataset.estadoNombre;
@@ -443,7 +447,7 @@
 			
 			setFieldsReadonly(true);
 		} else {
-			// No hay cliente seleccionado - limpiar campos
+			// No hay cliente seleccionado - limpiar campos y ocultar secciones
 			clienteIdHidden.value = '';
 			estadoDisplay.value = '';
 			cpInput.value = '';
@@ -453,6 +457,10 @@
 			tipoPersonaDisplay.value = '';
 			sexoDisplay.value = '';
 			edadInput.value = '';
+			
+			// Ocultar secciones de información del cliente
+			document.getElementById('seccion_geografica').style.display = 'none';
+			document.getElementById('seccion_caracteristicas').style.display = 'none';
 			
 			setFieldsReadonly(false);
 		}
