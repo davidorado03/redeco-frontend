@@ -723,7 +723,7 @@ def create_queja(request):
 @require_http_methods(['GET'])
 @require_token
 def clientes_list(request):
-    """Lista de todos los clientes."""
+    """Lista de todos los clientes con filtros y ordenamiento."""
     clientes = Cliente.objects.all()
     
     # Capturar mensajes de sesión y limpiarlos
@@ -732,12 +732,50 @@ def clientes_list(request):
     delete_success = request.session.pop('delete_success', None)
     delete_error = request.session.pop('delete_error', None)
     
+    # Filtros
+    rfc_filter = request.GET.get('rfc', '').strip()
+    tipo_filter = request.GET.get('tipo', '').strip()
+    estado_filter = request.GET.get('estado', '').strip()
+    cp_filter = request.GET.get('cp', '').strip()
+    municipio_filter = request.GET.get('municipio', '').strip()
+    
+    if rfc_filter:
+        clientes = clientes.filter(rfc__icontains=rfc_filter)
+    if tipo_filter:
+        clientes = clientes.filter(tipo_persona=int(tipo_filter))
+    if estado_filter:
+        clientes = clientes.filter(estado_id=int(estado_filter))
+    if cp_filter:
+        clientes = clientes.filter(codigo_postal__icontains=cp_filter)
+    if municipio_filter:
+        clientes = clientes.filter(municipio_id=int(municipio_filter))
+    
+    # Ordenamiento
+    order_by = request.GET.get('order_by', '-id')  # Por defecto descendente por ID
+    valid_orders = ['id', '-id', 'nombre', '-nombre', 'rfc', '-rfc']
+    if order_by in valid_orders:
+        clientes = clientes.order_by(order_by)
+    else:
+        clientes = clientes.order_by('-id')
+    
+    # Obtener listas únicas para los filtros
+    estados_disponibles = Cliente.objects.exclude(estado_id__isnull=True).values('estado_id', 'estado_nombre').distinct().order_by('estado_nombre')
+    municipios_disponibles = Cliente.objects.exclude(municipio_id__isnull=True).values('municipio_id', 'municipio_nombre').distinct().order_by('municipio_nombre')
+    
     context = {
         'clientes': clientes,
         'create_success': create_success,
         'update_success': update_success,
         'delete_success': delete_success,
         'delete_error': delete_error,
+        'rfc_filter': rfc_filter,
+        'tipo_filter': tipo_filter,
+        'estado_filter': estado_filter,
+        'cp_filter': cp_filter,
+        'municipio_filter': municipio_filter,
+        'order_by': order_by,
+        'estados_disponibles': estados_disponibles,
+        'municipios_disponibles': municipios_disponibles,
     }
     return render(request, 'clientes_list.html', context)
 
