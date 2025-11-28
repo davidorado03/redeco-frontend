@@ -570,10 +570,11 @@ def create_queja(request):
         pori = (request.POST.get('pori') or '').strip().upper()
         estatus = (request.POST.get('estatus') or '').strip()
         
-        # Datos del cliente - pueden venir del catálogo o manualmente
+        # Datos del cliente - DEBE venir del catálogo obligatoriamente
         cliente_id = (request.POST.get('cliente_id') or '').strip()
-        if cliente_id:
-            # Si se seleccionó un cliente del catálogo, usar sus datos
+        if not cliente_id:
+            error = 'Debe seleccionar un cliente del catálogo. Si el cliente no existe, créelo primero.'
+        else:
             try:
                 cliente = Cliente.objects.get(id=cliente_id)
                 estado_id = str(cliente.estado_id)
@@ -585,28 +586,15 @@ def create_queja(request):
                 sexo = cliente.sexo or ''
                 edad = str(cliente.edad) if cliente.edad else ''
             except Cliente.DoesNotExist:
-                estado_id = (request.POST.get('estado_id') or '').strip()
-                municipio = (request.POST.get('municipio') or '').strip()
-                localidad = (request.POST.get('localidad') or '').strip()
-                colonia = (request.POST.get('colonia') or '').strip()
-                if colonia.lower() == 'undefined':
-                    colonia = ''
-                cp = (request.POST.get('cp') or '').strip()
-                tipo_persona = (request.POST.get('tipo_persona') or '').strip()
-                sexo = (request.POST.get('sexo') or '').strip()
-                edad = (request.POST.get('edad') or '').strip()
-        else:
-            # Datos ingresados manualmente
-            estado_id = (request.POST.get('estado_id') or '').strip()
-            municipio = (request.POST.get('municipio') or '').strip()
-            localidad = (request.POST.get('localidad') or '').strip()
-            colonia = (request.POST.get('colonia') or '').strip()
-            if colonia.lower() == 'undefined':
+                error = 'El cliente seleccionado no existe. Por favor, seleccione un cliente válido.'
+                estado_id = ''
+                municipio = ''
                 colonia = ''
-            cp = (request.POST.get('cp') or '').strip()
-            tipo_persona = (request.POST.get('tipo_persona') or '').strip()
-            sexo = (request.POST.get('sexo') or '').strip()
-            edad = (request.POST.get('edad') or '').strip()
+                cp = ''
+                localidad = ''
+                tipo_persona = ''
+                sexo = ''
+                edad = ''
         
         fecha_resolucion = (request.POST.get('fecha_resolucion') or '').strip()
         fecha_notificacion = (request.POST.get('fecha_notificacion') or '').strip()
@@ -626,6 +614,7 @@ def create_queja(request):
             'causas_id': causas_id,
             'pori': pori,
             'estatus': estatus,
+            'cliente_id': cliente_id,
             'estado_id': estado_id,
             'municipio': municipio,
             'localidad': localidad,
@@ -642,7 +631,10 @@ def create_queja(request):
         }
 
         # Enhanced validation per REDECO requirements
-        if not all([no_trim, folio, fecha_recepcion, medio_id, nivel_id, producto, causas_id, pori, estatus, estado_id, municipio, colonia, cp, tipo_persona]):
+        if error:
+            # Ya hay un error (cliente no seleccionado o no válido)
+            pass
+        elif not all([no_trim, folio, fecha_recepcion, medio_id, nivel_id, producto, causas_id, pori, estatus, estado_id, municipio, colonia, cp, tipo_persona]):
             error = 'Todos los campos marcados como requeridos deben ser completados.'
         elif pori not in ['SI', 'NO']:
             error = 'PORI debe ser "SI" o "NO" (mayúsculas).'

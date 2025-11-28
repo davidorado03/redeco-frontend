@@ -114,15 +114,15 @@
 						<div class="col-12 mb-4">
 							<hr>
 							<h6 class="text-primary">Datos del Usuario</h6>
-							<div class="alert alert-info">
-								<i class="bi bi-info-circle"></i> Puede seleccionar un cliente existente o ingresar los datos manualmente
+							<div class="alert alert-warning">
+								<i class="bi bi-exclamation-triangle"></i> Debe seleccionar un cliente del catálogo. Si el cliente no existe, créelo primero en el catálogo.
 							</div>
 						</div>
 
 						<div class="col-md-6 mb-3">
-							<label class="form-label">Seleccionar Cliente del Catálogo</label>
-							<select id="cliente_select" class="form-control">
-								<option value="">-- Ingresar datos manualmente --</option>
+							<label class="form-label">Seleccionar Cliente del Catálogo <span class="text-danger">*</span></label>
+							<select id="cliente_select" class="form-control" required>
+								<option value="">-- Seleccione un cliente --</option>
 								{% for c in clientes %}
 								<option value="{{ c.id }}" 
 									data-tipo="{{ c.tipo_persona }}"
@@ -140,17 +140,20 @@
 								</option>
 								{% endfor %}
 							</select>
-							<small class="form-text text-muted">Seleccione un cliente existente para autocompletar</small>
+							<small class="form-text text-muted">Obligatorio: debe seleccionar un cliente del catálogo</small>
 						</div>
 
 						<div class="col-md-6 mb-3">
 							<label class="form-label">&nbsp;</label>
-							<div>
+							<div class="d-flex gap-2">
+								<a href="{% url 'redeco_frontend:clientes_create' %}" class="btn btn-success btn-sm" target="_blank">
+									<i class="bi bi-plus-circle"></i> Crear Nuevo Cliente
+								</a>
 								<a href="{% url 'redeco_frontend:clientes_list' %}" class="btn btn-outline-primary btn-sm" target="_blank">
-									<i class="bi bi-pencil-square"></i> Ir al Catálogo de Clientes
+									<i class="bi bi-pencil-square"></i> Ver Catálogo
 								</a>
 							</div>
-							<small class="form-text text-muted">Abrir en nueva pestaña para modificar clientes</small>
+							<small class="form-text text-muted">Se abrirá en nueva pestaña</small>
 						</div>
 
 						<input type="hidden" id="cliente_id_hidden" name="cliente_id" value="">
@@ -311,40 +314,34 @@
 	const sexoDisplay = document.getElementById('sexo_display');
 	const edadInput = document.getElementById('edad_input');
 	
-	// Función para habilitar/deshabilitar campos
+	// Función para habilitar/deshabilitar campos (siempre en solo lectura)
 	function setFieldsReadonly(readonly) {
-		if (readonly) {
-			// Mostrar campos de solo lectura
-			estadoDisplay.style.display = 'block';
-			estadoSelect.style.display = 'none';
-			municipioDisplay.style.display = 'block';
-			municipioSelect.style.display = 'none';
-			coloniaDisplay.style.display = 'block';
-			coloniaSelect.style.display = 'none';
-			tipoPersonaDisplay.style.display = 'block';
-			tipoPersonaSelect.style.display = 'none';
-			sexoDisplay.style.display = 'block';
-			sexoSelect.style.display = 'none';
-			
-			cpInput.readOnly = true;
-			localidadInput.readOnly = true;
-			edadInput.readOnly = true;
-		} else {
-			// Mostrar campos editables
-			estadoDisplay.style.display = 'none';
-			estadoSelect.style.display = 'block';
-			municipioDisplay.style.display = 'none';
-			municipioSelect.style.display = 'block';
-			coloniaDisplay.style.display = 'none';
-			coloniaSelect.style.display = 'block';
-			tipoPersonaDisplay.style.display = 'none';
-			tipoPersonaSelect.style.display = 'block';
-			sexoDisplay.style.display = 'none';
-			sexoSelect.style.display = 'block';
-			
-			cpInput.readOnly = false;
-			localidadInput.readOnly = false;
-			edadInput.readOnly = false;
+		// Siempre mostrar campos de solo lectura
+		estadoDisplay.style.display = 'block';
+		estadoSelect.style.display = 'none';
+		municipioDisplay.style.display = 'block';
+		municipioSelect.style.display = 'none';
+		coloniaDisplay.style.display = 'block';
+		coloniaSelect.style.display = 'none';
+		tipoPersonaDisplay.style.display = 'block';
+		tipoPersonaSelect.style.display = 'none';
+		sexoDisplay.style.display = 'block';
+		sexoSelect.style.display = 'none';
+		
+		cpInput.readOnly = true;
+		localidadInput.readOnly = true;
+		edadInput.readOnly = true;
+		
+		// Deshabilitar campos si no hay cliente seleccionado
+		if (!readonly) {
+			estadoDisplay.value = '';
+			cpInput.value = '';
+			municipioDisplay.value = '';
+			coloniaDisplay.value = '';
+			localidadInput.value = '';
+			tipoPersonaDisplay.value = '';
+			sexoDisplay.value = '';
+			edadInput.value = '';
 		}
 	}
 	
@@ -373,12 +370,12 @@
 			estadoDisplay.value = estadoNombre;
 			estadoSelect.value = estadoId;
 			cpInput.value = cp;
-			municipioDisplay.value = municipioNombre || '';
-			coloniaDisplay.value = coloniaNombre || '';
+			municipioDisplay.value = municipioNombre || 'N/A';
+			coloniaDisplay.value = coloniaNombre || 'N/A';
 			localidadInput.value = localidad || '';
 			tipoPersonaDisplay.value = tipoPersona === '1' ? '1 - Persona Física' : '2 - Persona Moral';
 			tipoPersonaSelect.value = tipoPersona;
-			sexoDisplay.value = sexo === 'H' ? 'H - Hombre' : sexo === 'M' ? 'M - Mujer' : '';
+			sexoDisplay.value = sexo === 'H' ? 'H - Hombre' : sexo === 'M' ? 'M - Mujer' : 'N/A';
 			sexoSelect.value = sexo || '';
 			edadInput.value = edad || '';
 			
@@ -394,7 +391,7 @@
 			
 			setFieldsReadonly(true);
 		} else {
-			// Entrada manual - limpiar y habilitar campos
+			// No hay cliente seleccionado - limpiar campos
 			clienteIdHidden.value = '';
 			estadoDisplay.value = '';
 			cpInput.value = '';
@@ -409,7 +406,7 @@
 		}
 	});
 	
-	// Inicializar en modo editable
+	// Inicializar siempre en modo solo lectura (vacío hasta seleccionar cliente)
 	setFieldsReadonly(false);
 	
 	// Elementos ya declarados arriba, no redeclarar
