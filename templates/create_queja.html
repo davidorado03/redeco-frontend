@@ -173,92 +173,96 @@
 					<input type="hidden" id="cliente_id_hidden" name="cliente_id" value="">
 
 					<!-- SECCIÓN 3: DATOS GEOGRÁFICOS -->
-					<div id="seccion_geografica" class="row mt-4" style="display:none;">
-						<div class="col-12 mb-3">
-							<h6 class="text-primary border-bottom pb-2">
-								<i class="bi bi-geo-alt"></i> Ubicación Geográfica
-							</h6>
-						</div>
-					</div>
-
-					<div class="row">
-						<div class="col-md-3 mb-3">
-							<label class="form-label">Entidad Federativa <span class="text-danger">*</span></label>
-							<input type="text" id="estado_nombre_display" class="form-control" readonly style="display:none;">
-							<select id="estado_id_geo" name="estado_id" class="form-control" required>
-								<option value="">-- Seleccione --</option>
-								{% for e in estados %}
-								<option value="{{ e.claveEdo }}">{{ e.estado }}</option>
-								{% endfor %}
-							</select>
+					<div id="seccion_geografica" style="display:none;">
+						<div class="row mt-4">
+							<div class="col-12 mb-3">
+								<h6 class="text-primary border-bottom pb-2">
+									<i class="bi bi-geo-alt"></i> Ubicación Geográfica
+								</h6>
+							</div>
 						</div>
 
-						<div class="col-md-3 mb-3">
-							<label class="form-label">Código Postal <span class="text-danger">*</span></label>
-							<input type="text" id="cp_input" name="cp" class="form-control" maxlength="5" pattern="[0-9]{5}" value="{{ form.cp }}" required />
-							<small class="form-text text-muted">5 dígitos</small>
-						</div>
+						<div class="row">
+							<div class="col-md-3 mb-3">
+								<label class="form-label">Entidad Federativa <span class="text-danger">*</span></label>
+								<input type="text" id="estado_nombre_display" class="form-control" readonly style="display:none;">
+								<select id="estado_id_geo" name="estado_id" class="form-control" required>
+									<option value="">-- Seleccione --</option>
+									{% for e in estados %}
+									<option value="{{ e.claveEdo }}">{{ e.estado }}</option>
+									{% endfor %}
+								</select>
+							</div>
 
-						<div class="col-md-3 mb-3">
-							<label class="form-label">Municipio <span class="text-danger">*</span></label>
-							<input type="text" id="municipio_nombre_display" class="form-control" readonly style="display:none;">
-							<select id="municipio_select" name="municipio" class="form-control" required disabled>
-								<option value="">-- Ingrese CP primero --</option>
-							</select>
-							<small class="form-text text-muted">Según CP</small>
-						</div>
+							<div class="col-md-3 mb-3">
+								<label class="form-label">Código Postal <span class="text-danger">*</span></label>
+								<input type="text" id="cp_input" name="cp" class="form-control" maxlength="5" pattern="[0-9]{5}" value="{{ form.cp }}" required />
+								<small class="form-text text-muted">5 dígitos</small>
+							</div>
 
-						<div class="col-md-3 mb-3">
-							<label class="form-label">Colonia <span class="text-danger">*</span></label>
-							<input type="text" id="colonia_nombre_display" class="form-control" readonly style="display:none;">
-							<select id="colonia_select" name="colonia" class="form-control" required disabled>
-								<option value="">-- Ingrese CP primero --</option>
-							</select>
-							<small class="form-text text-muted">Según CP</small>
-						</div>
+							<div class="col-md-3 mb-3">
+								<label class="form-label">Municipio <span class="text-danger">*</span></label>
+								<input type="text" id="municipio_nombre_display" class="form-control" readonly style="display:none;">
+								<select id="municipio_select" name="municipio" class="form-control" required disabled>
+									<option value="">-- Ingrese CP primero --</option>
+								</select>
+								<small class="form-text text-muted">Según CP</small>
+							</div>
 
-						<div class="col-md-12 mb-3">
-							<label class="form-label">Localidad</label>
-							<input id="localidad_input" name="localidad" class="form-control" maxlength="8" value="{{ form.localidad }}" />
-							<small class="form-text text-muted">Opcional</small>
+							<div class="col-md-3 mb-3">
+								<label class="form-label">Colonia <span class="text-danger">*</span></label>
+								<input type="text" id="colonia_nombre_display" class="form-control" readonly style="display:none;">
+								<select id="colonia_select" name="colonia" class="form-control" required disabled>
+									<option value="">-- Ingrese CP primero --</option>
+								</select>
+								<small class="form-text text-muted">Según CP</small>
+							</div>
+
+							<div class="col-md-12 mb-3">
+								<label class="form-label">Localidad</label>
+								<input id="localidad_input" name="localidad" class="form-control" maxlength="8" value="{{ form.localidad }}" />
+								<small class="form-text text-muted">Opcional</small>
+							</div>
 						</div>
 					</div>
 
 					<!-- SECCIÓN 4: CARACTERÍSTICAS DEL USUARIO -->
-					<div id="seccion_caracteristicas" class="row mt-4" style="display:none;">
-						<div class="col-12 mb-3">
-							<h6 class="text-primary border-bottom pb-2">
-								<i class="bi bi-person-badge"></i> Características del Usuario
-							</h6>
-						</div>
-					</div>
-
-					<div class="row">
-						<div class="col-md-4 mb-3">
-							<label class="form-label">Tipo de persona <span class="text-danger">*</span></label>
-							<input type="text" id="tipo_persona_display" class="form-control" readonly style="display:none;">
-							<select id="tipo_persona_select" name="tipo_persona" class="form-control" required>
-								<option value="">-- Seleccione --</option>
-								<option value="1">1 - Persona Física</option>
-								<option value="2">2 - Persona Moral</option>
-							</select>
+					<div id="seccion_caracteristicas" style="display:none;">
+						<div class="row mt-4">
+							<div class="col-12 mb-3">
+								<h6 class="text-primary border-bottom pb-2">
+									<i class="bi bi-person-badge"></i> Características del Usuario
+								</h6>
+							</div>
 						</div>
 
-						<div class="col-md-4 mb-3">
-							<label class="form-label">Sexo</label>
-							<input type="text" id="sexo_display" class="form-control" readonly style="display:none;">
-							<select id="sexo_select" name="sexo" class="form-control">
-								<option value="">-- --</option>
-								<option value="H">H - Hombre</option>
-								<option value="M">M - Mujer</option>
-							</select>
-							<small class="form-text text-muted">Solo persona física</small>
-						</div>
+						<div class="row">
+							<div class="col-md-4 mb-3">
+								<label class="form-label">Tipo de persona <span class="text-danger">*</span></label>
+								<input type="text" id="tipo_persona_display" class="form-control" readonly style="display:none;">
+								<select id="tipo_persona_select" name="tipo_persona" class="form-control" required>
+									<option value="">-- Seleccione --</option>
+									<option value="1">1 - Persona Física</option>
+									<option value="2">2 - Persona Moral</option>
+								</select>
+							</div>
 
-						<div class="col-md-4 mb-3">
-							<label class="form-label">Edad</label>
-							<input type="number" id="edad_input" name="edad" class="form-control" min="0" max="999" value="{{ form.edad }}" />
-							<small class="form-text text-muted">Solo persona física</small>
+							<div class="col-md-4 mb-3">
+								<label class="form-label">Sexo</label>
+								<input type="text" id="sexo_display" class="form-control" readonly style="display:none;">
+								<select id="sexo_select" name="sexo" class="form-control">
+									<option value="">-- --</option>
+									<option value="H">H - Hombre</option>
+									<option value="M">M - Mujer</option>
+								</select>
+								<small class="form-text text-muted">Solo persona física</small>
+							</div>
+
+							<div class="col-md-4 mb-3">
+								<label class="form-label">Edad</label>
+								<input type="number" id="edad_input" name="edad" class="form-control" min="0" max="999" value="{{ form.edad }}" />
+								<small class="form-text text-muted">Solo persona física</small>
+							</div>
 						</div>
 					</div>
 
