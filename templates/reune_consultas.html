@@ -51,41 +51,193 @@
 
     <div class="card">
       <div class="card-header">
-        <h5 class="mb-0">Formulario de Envío</h5>
+        <h5 class="mb-0">Formulario de Envío de Consultas</h5>
       </div>
       <div class="card-body">
         <form method="post">
           {% csrf_token %}
-          <div class="mb-3">
-            <label for="payload" class="form-label">Payload JSON (Array de consultas):</label>
-            <textarea 
-              class="form-control font-monospace" 
-              id="payload" 
-              name="payload" 
-              rows="20" 
-              placeholder='[
-  {
-    "InstitucionClave": "Unión de Crédito Integral, S.A. de C.V.",
-    "Sector": "Uniones de crédito",
-    "ConsultasTrim": 3,
-    "NumConsultas": 1,
-    "ConsultasFolio": "250701",
-    ...
-  }
-]'
-              required
-            >{{ payload_text }}</textarea>
-            <div class="form-text">
-              Pega aquí el JSON con el array de consultas. Ejemplo: <code>envio_3er_trim.json</code>
+          
+          <!-- SECCIÓN 1: INFORMACIÓN DE LA INSTITUCIÓN -->
+          <div class="row">
+            <div class="col-12 mb-3">
+              <h6 class="text-primary border-bottom pb-2">
+                <i class="bi bi-building"></i> Información de la Institución
+              </h6>
             </div>
           </div>
-          
-          <button type="submit" class="btn btn-primary" {% if not token %}disabled{% endif %}>
-            Enviar Consultas
-          </button>
-          <a href="{% url 'redeco_frontend:index' %}" class="btn btn-secondary">
-            Volver al inicio
-          </a>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Institución Clave <span class="text-danger">*</span></label>
+              <input type="text" name="institucion_clave" class="form-control" value="{{ form.institucion_clave }}" required />
+              <small class="form-text text-muted">Ej: Unión de Crédito Integral, S.A. de C.V.</small>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Sector <span class="text-danger">*</span></label>
+              <input type="text" name="sector" class="form-control" value="{{ form.sector }}" required />
+              <small class="form-text text-muted">Ej: Uniones de crédito</small>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 2: DATOS DE LA CONSULTA -->
+          <div class="row mt-4">
+            <div class="col-12 mb-3">
+              <h6 class="text-primary border-bottom pb-2">
+                <i class="bi bi-file-text"></i> Datos de la Consulta
+              </h6>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Trimestre <span class="text-danger">*</span></label>
+              <select name="consultas_trim" class="form-control" required>
+                <option value="">-- Seleccione --</option>
+                <option value="1">1 - Enero-Marzo</option>
+                <option value="2">2 - Abril-Junio</option>
+                <option value="3">3 - Julio-Septiembre</option>
+                <option value="4">4 - Octubre-Diciembre</option>
+              </select>
+            </div>
+
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Número de Consultas <span class="text-danger">*</span></label>
+              <input type="number" name="num_consultas" class="form-control" value="{{ form.num_consultas|default:'1' }}" min="1" required />
+            </div>
+
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Folio <span class="text-danger">*</span></label>
+              <input type="text" name="consultas_folio" class="form-control" value="{{ form.consultas_folio }}" maxlength="50" required />
+            </div>
+
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Estatus <span class="text-danger">*</span></label>
+              <select name="consultas_estatus_con" class="form-control" required>
+                <option value="">-- Seleccione --</option>
+                <option value="1">1 - Pendiente</option>
+                <option value="2">2 - Concluido</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Fecha de Atención <span class="text-danger">*</span></label>
+              <input type="date" name="consultas_fec_aten" class="form-control" value="{{ form.consultas_fec_aten }}" required />
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Fecha de Recepción <span class="text-danger">*</span></label>
+              <input type="date" name="consultas_fec_recepcion" class="form-control" value="{{ form.consultas_fec_recepcion }}" required />
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label">PORI <span class="text-danger">*</span></label>
+              <select name="consultas_pori" class="form-control" required>
+                <option value="">-- Seleccione --</option>
+                <option value="SI">SI</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 3: PRODUCTO Y CAUSA -->
+          <div class="row mt-4">
+            <div class="col-12 mb-3">
+              <h6 class="text-primary border-bottom pb-2">
+                <i class="bi bi-tag"></i> Producto y Causa
+              </h6>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Medio de Recepción <span class="text-danger">*</span></label>
+              <select name="medios_id" class="form-control" required>
+                <option value="">-- Seleccione --</option>
+                {% for m in medios %}
+                <option value="{{ m.medioId }}">{{ m.medioDsc }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Nivel de Atención <span class="text-danger">*</span></label>
+              <select name="consultas_cat_nivel_aten_id" class="form-control" required>
+                <option value="">-- Seleccione --</option>
+                {% for n in niveles %}
+                <option value="{{ n.nivelDeAtencionId }}">{{ n.nivelDeAtencionDsc }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Producto <span class="text-danger">*</span></label>
+              <input type="text" name="producto" class="form-control" value="{{ form.producto }}" required />
+              <small class="form-text text-muted">Código del producto</small>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12 mb-3">
+              <label class="form-label">Causa ID <span class="text-danger">*</span></label>
+              <input type="text" name="causa_id" class="form-control" value="{{ form.causa_id }}" required />
+              <small class="form-text text-muted">Código de la causa</small>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 4: UBICACIÓN GEOGRÁFICA -->
+          <div class="row mt-4">
+            <div class="col-12 mb-3">
+              <h6 class="text-primary border-bottom pb-2">
+                <i class="bi bi-geo-alt"></i> Ubicación Geográfica
+              </h6>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Estado <span class="text-danger">*</span></label>
+              <select name="estados_id" class="form-control" required>
+                <option value="">-- Seleccione --</option>
+                {% for e in estados %}
+                <option value="{{ e.claveEdo }}">{{ e.estado }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Código Postal <span class="text-danger">*</span></label>
+              <input type="text" name="consultas_cp" class="form-control" maxlength="5" pattern="[0-9]{5}" value="{{ form.consultas_cp }}" required />
+            </div>
+
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Municipio ID <span class="text-danger">*</span></label>
+              <input type="number" name="consultas_mpio_id" class="form-control" value="{{ form.consultas_mpio_id }}" required />
+            </div>
+
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Localidad ID <span class="text-danger">*</span></label>
+              <input type="number" name="consultas_loc_id" class="form-control" value="{{ form.consultas_loc_id }}" required />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12 mb-3">
+              <label class="form-label">Colonia ID <span class="text-danger">*</span></label>
+              <input type="number" name="consultas_col_id" class="form-control" value="{{ form.consultas_col_id }}" required />
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary" {% if not token %}disabled{% endif %}>
+              <i class="bi bi-send"></i> Enviar Consulta
+            </button>
+            <a href="{% url 'redeco_frontend:index' %}" class="btn btn-secondary">
+              <i class="bi bi-arrow-left"></i> Volver al inicio
+            </a>
+          </div>
         </form>
       </div>
     </div>

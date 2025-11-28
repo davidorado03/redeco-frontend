@@ -411,38 +411,144 @@ def catalogs_causas(request):
 def reune_consultas(request):
     """Submit consultas to REUNE API (POST to /reune/consultas/general)."""
     import json
+    from datetime import datetime
     
     token = request.session.get('redeco_token')
     result = None
     error = None
-    payload_text = ''
+    form = {}
+    
+    # Fetch catalogs for the form selects
+    medios = []
+    niveles = []
+    estados = []
+    
+    try:
+        med_resp = services.call_public_endpoint('catalogos/medio-recepcion')
+        if isinstance(med_resp, dict):
+            for key in ('medios', 'medio', 'mediosRecepcion', 'mediosDeRecepcion'):
+                val = med_resp.get(key)
+                if isinstance(val, list) and val:
+                    medios = val
+                    break
+        elif isinstance(med_resp, list):
+            medios = med_resp
+    except Exception:
+        pass
+
+    try:
+        niv_resp = services.call_public_endpoint('catalogos/nivel-atencion')
+        if isinstance(niv_resp, dict):
+            for key in ('niveles', 'nivel', 'nivelesAtencion', 'nivelesDeAtencion'):
+                val = niv_resp.get(key)
+                if isinstance(val, list) and val:
+                    niveles = val
+                    break
+        elif isinstance(niv_resp, list):
+            niveles = niv_resp
+    except Exception:
+        pass
+
+    try:
+        est_resp = services.call_public_endpoint('sepomex/estados')
+        if isinstance(est_resp, dict):
+            for key in ('estados', 'estado', 'data'):
+                val = est_resp.get(key)
+                if isinstance(val, list) and val:
+                    estados = val
+                    break
+        elif isinstance(est_resp, list):
+            estados = est_resp
+    except Exception:
+        pass
     
     if request.method == 'POST':
         if not token:
             error = 'Token no disponible. Genera un token desde la página principal.'
         else:
-            payload_text = request.POST.get('payload', '').strip()
+            # Capture form data
+            form = {
+                'institucion_clave': request.POST.get('institucion_clave', '').strip(),
+                'sector': request.POST.get('sector', '').strip(),
+                'consultas_trim': request.POST.get('consultas_trim', '').strip(),
+                'num_consultas': request.POST.get('num_consultas', '').strip(),
+                'consultas_folio': request.POST.get('consultas_folio', '').strip(),
+                'consultas_estatus_con': request.POST.get('consultas_estatus_con', '').strip(),
+                'consultas_fec_aten': request.POST.get('consultas_fec_aten', '').strip(),
+                'consultas_fec_recepcion': request.POST.get('consultas_fec_recepcion', '').strip(),
+                'consultas_pori': request.POST.get('consultas_pori', '').strip(),
+                'medios_id': request.POST.get('medios_id', '').strip(),
+                'consultas_cat_nivel_aten_id': request.POST.get('consultas_cat_nivel_aten_id', '').strip(),
+                'producto': request.POST.get('producto', '').strip(),
+                'causa_id': request.POST.get('causa_id', '').strip(),
+                'estados_id': request.POST.get('estados_id', '').strip(),
+                'consultas_cp': request.POST.get('consultas_cp', '').strip(),
+                'consultas_mpio_id': request.POST.get('consultas_mpio_id', '').strip(),
+                'consultas_loc_id': request.POST.get('consultas_loc_id', '').strip(),
+                'consultas_col_id': request.POST.get('consultas_col_id', '').strip(),
+            }
             
-            if not payload_text:
-                error = 'El payload JSON no puede estar vacío.'
+            # Validate required fields
+            required_fields = [
+                'institucion_clave', 'sector', 'consultas_trim', 'num_consultas',
+                'consultas_folio', 'consultas_estatus_con', 'consultas_fec_aten',
+                'consultas_fec_recepcion', 'consultas_pori', 'medios_id',
+                'consultas_cat_nivel_aten_id', 'producto', 'causa_id',
+                'estados_id', 'consultas_cp', 'consultas_mpio_id',
+                'consultas_loc_id', 'consultas_col_id'
+            ]
+            
+            missing = [f for f in required_fields if not form.get(f)]
+            if missing:
+                error = f'Faltan campos requeridos: {", ".join(missing)}'
             else:
                 try:
-                    # Parse JSON payload
-                    payload = json.loads(payload_text)
-                except json.JSONDecodeError as e:
-                    error = f'JSON inválido: {str(e)}'
-                else:
-                    try:
-                        # Call REUNE API
-                        result = services.post_reune_consultas_general(token, payload)
-                    except services.RedeCoAPIError as exc:
-                        error = str(exc)
+                    # Convert dates from YYYY-MM-DD to DD/MM/YYYY
+                    fec_aten = datetime.strptime(form['consultas_fec_aten'], '%Y-%m-%d').strftime('%d/%m/%Y')
+                    fec_recepcion = datetime.strptime(form['consultas_fec_recepcion'], '%Y-%m-%d').strftime('%d/%m/%Y')
+                    
+                    # Build payload as array with single consulta
+                    payload = [{
+                        "InstitucionClave": form['institucion_clave'],
+                        "Sector": form['sector'],
+                        "ConsultasTrim": int(form['consultas_trim']),
+                        "NumConsultas": int(form['num_consultas']),
+                        "ConsultasFolio": form['consultas_folio'],
+                        "ConsultasEstatusCon": int(form['consultas_estatus_con']),
+                        "ConsultasFecAten": fec_aten,
+                        "EstadosId": int(form['estados_id']),
+                        "ConsultasFecRecepcion": fec_recepcion,
+                        "MediosId": int(form['medios_id']),
+                        "Producto": form['producto'],
+                        "CausaId": form['causa_id'],
+                        "ConsultasCP": int(form['consultas_cp']),
+                        "ConsultasMpioId": int(form['consultas_mpio_id']),
+                        "ConsultasLocId": int(form['consultas_loc_id']),
+                        "ConsultasColId": int(form['consultas_col_id']),
+                        "ConsultascatnivelatenId": int(form['consultas_cat_nivel_aten_id']),
+                        "ConsultasPori": form['consultas_pori']
+                    }]
+                    
+                    # Call REUNE API
+                    result = services.post_reune_consultas_general(token, payload)
+                    
+                    # Clear form on success
+                    if result and not error:
+                        form = {}
+                        
+                except ValueError as e:
+                    error = f'Error en formato de datos: {str(e)}'
+                except services.RedeCoAPIError as exc:
+                    error = str(exc)
     
     context = {
         'token': token,
         'result': result,
         'error': error,
-        'payload_text': payload_text,
+        'form': form,
+        'medios': medios,
+        'niveles': niveles,
+        'estados': estados,
     }
     return render(request, 'reune_consultas.html', context)
 
