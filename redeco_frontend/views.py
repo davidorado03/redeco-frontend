@@ -725,8 +725,19 @@ def create_queja(request):
 def clientes_list(request):
     """Lista de todos los clientes."""
     clientes = Cliente.objects.all()
+    
+    # Capturar mensajes de sesión y limpiarlos
+    create_success = request.session.pop('create_success', None)
+    update_success = request.session.pop('update_success', None)
+    delete_success = request.session.pop('delete_success', None)
+    delete_error = request.session.pop('delete_error', None)
+    
     context = {
         'clientes': clientes,
+        'create_success': create_success,
+        'update_success': update_success,
+        'delete_success': delete_success,
+        'delete_error': delete_error,
     }
     return render(request, 'clientes_list.html', context)
 
@@ -807,8 +818,8 @@ def clientes_create(request):
                 )
                 cliente.full_clean()  # Ejecutar validaciones del modelo
                 cliente.save()
-                success = f'Cliente {nombre} creado exitosamente.'
-                form_data = {}  # Limpiar formulario
+                request.session['create_success'] = f'Cliente {nombre} creado exitosamente.'
+                return redirect('redeco_frontend:clientes_list')
             except Exception as e:
                 error = f'Error al crear cliente: {str(e)}'
     
@@ -879,7 +890,8 @@ def clientes_edit(request, cliente_id):
                 
                 cliente.full_clean()  # Ejecutar validaciones del modelo
                 cliente.save()
-                success = f'Cliente {nombre} actualizado exitosamente.'
+                request.session['update_success'] = f'Cliente {nombre} actualizado exitosamente.'
+                return redirect('redeco_frontend:clientes_list')
             except Exception as e:
                 error = f'Error al actualizar cliente: {str(e)}'
     

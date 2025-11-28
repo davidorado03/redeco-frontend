@@ -11,16 +11,30 @@
 				</a>
 			</div>
 			<div class="card-body">
-				{% if request.session.delete_success %}
+				{% if create_success %}
 				<div class="alert alert-success alert-dismissible fade show" role="alert">
-					{{ request.session.delete_success }}
+					{{ create_success }}
 					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 				</div>
 				{% endif %}
 
-				{% if request.session.delete_error %}
+				{% if update_success %}
+				<div class="alert alert-success alert-dismissible fade show" role="alert">
+					{{ update_success }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+				</div>
+				{% endif %}
+
+				{% if delete_success %}
+				<div class="alert alert-success alert-dismissible fade show" role="alert">
+					{{ delete_success }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+				</div>
+				{% endif %}
+
+				{% if delete_error %}
 				<div class="alert alert-danger alert-dismissible fade show" role="alert">
-					{{ request.session.delete_error }}
+					{{ delete_error }}
 					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 				</div>
 				{% endif %}
@@ -116,22 +130,4 @@
 		</div>
 	</div>
 </div>
-
-<script>
-// Limpiar mensajes de sesión después de mostrarlos
-{% if request.session.delete_success %}
-fetch('{% url "redeco_frontend:clientes_list" %}', {
-	method: 'POST',
-	headers: {'X-CSRFToken': '{{ csrf_token }}'},
-	body: JSON.stringify({clear_session: 'delete_success'})
-});
-{% endif %}
-{% if request.session.delete_error %}
-fetch('{% url "redeco_frontend:clientes_list" %}', {
-	method: 'POST',
-	headers: {'X-CSRFToken': '{{ csrf_token }}'},
-	body: JSON.stringify({clear_session: 'delete_error'})
-});
-{% endif %}
-</script>
 {% endblock %}

@@ -29,16 +29,16 @@
 						<div class="col-md-6 mb-3">
 							<label class="form-label">Nombre del cliente <span class="text-danger">*</span></label>
 							<input type="text" name="nombre" class="form-control" 
-								   value="{% if edit_mode %}{{ cliente.nombre }}{% else %}{{ form.nombre }}{% endif %}" 
-								   required maxlength="255" />
+								value="{% if edit_mode %}{{ cliente.nombre }}{% else %}{{ form.nombre }}{% endif %}" 
+								required maxlength="255" />
 						</div>
 
 						<div class="col-md-6 mb-3">
 							<label class="form-label">RFC <span class="text-danger">*</span></label>
 							<input type="text" name="rfc" class="form-control" 
-								   value="{% if edit_mode %}{{ cliente.rfc }}{% else %}{{ form.rfc }}{% endif %}" 
-								   required maxlength="13" pattern="[A-Z&Ñ]{3,4}[0-9]{6}[A-Z0-9]{3}" 
-								   style="text-transform:uppercase;" />
+								value="{% if edit_mode %}{{ cliente.rfc }}{% else %}{{ form.rfc }}{% endif %}" 
+								required maxlength="13" pattern="[A-Z&Ñ]{3,4}[0-9]{6}[A-Z0-9]{3}" 
+								style="text-transform:uppercase;" />
 							<small class="form-text text-muted">Formato: XAXX010101000 (12-13 caracteres)</small>
 						</div>
 
@@ -64,14 +64,14 @@
 								{% endfor %}
 							</select>
 							<input type="hidden" name="estado_nombre" id="estado_nombre" 
-								   value="{% if edit_mode %}{{ cliente.estado_nombre }}{% else %}{{ form.estado_nombre }}{% endif %}" />
+								value="{% if edit_mode %}{{ cliente.estado_nombre }}{% else %}{{ form.estado_nombre }}{% endif %}" />
 						</div>
 
 						<div class="col-md-6 mb-3">
 							<label class="form-label">Código Postal <span class="text-danger">*</span></label>
 							<input type="text" id="cp_input" name="codigo_postal" class="form-control" 
-								   value="{% if edit_mode %}{{ cliente.codigo_postal }}{% else %}{{ form.codigo_postal }}{% endif %}" 
-								   required maxlength="5" pattern="[0-9]{5}" />
+								value="{% if edit_mode %}{{ cliente.codigo_postal }}{% else %}{{ form.codigo_postal }}{% endif %}" 
+								required maxlength="5" pattern="[0-9]{5}" />
 						</div>
 
 						<div class="col-md-6 mb-3">
@@ -80,7 +80,7 @@
 								<option value="">-- Ingrese CP primero --</option>
 							</select>
 							<input type="hidden" name="municipio_nombre" id="municipio_nombre" 
-								   value="{% if edit_mode %}{{ cliente.municipio_nombre }}{% else %}{{ form.municipio_nombre }}{% endif %}" />
+								value="{% if edit_mode %}{{ cliente.municipio_nombre }}{% else %}{{ form.municipio_nombre }}{% endif %}" />
 						</div>
 
 						<div class="col-md-6 mb-3">
@@ -89,14 +89,14 @@
 								<option value="">-- Ingrese CP primero --</option>
 							</select>
 							<input type="hidden" name="colonia_nombre" id="colonia_nombre" 
-								   value="{% if edit_mode %}{{ cliente.colonia_nombre }}{% else %}{{ form.colonia_nombre }}{% endif %}" />
+								value="{% if edit_mode %}{{ cliente.colonia_nombre }}{% else %}{{ form.colonia_nombre }}{% endif %}" />
 						</div>
 
 						<div class="col-md-6 mb-3">
 							<label class="form-label">Localidad</label>
 							<input type="text" name="localidad" class="form-control" 
-								   value="{% if edit_mode %}{{ cliente.localidad }}{% else %}{{ form.localidad }}{% endif %}" 
-								   maxlength="8" />
+								value="{% if edit_mode %}{{ cliente.localidad }}{% else %}{{ form.localidad }}{% endif %}" 
+								maxlength="8" />
 						</div>
 
 						<!-- Campos solo para persona física -->
@@ -113,8 +113,8 @@
 						<div class="col-md-6 mb-3" id="edad_field">
 							<label class="form-label">Edad</label>
 							<input type="number" name="edad" class="form-control" 
-								   value="{% if edit_mode %}{{ cliente.edad }}{% else %}{{ form.edad }}{% endif %}" 
-								   min="0" max="999" />
+                                value="{% if edit_mode %}{{ cliente.edad }}{% else %}{{ form.edad }}{% endif %}" 
+                                min="0" max="999" />
 							<small class="form-text text-muted">Solo para persona física (máx. 3 dígitos)</small>
 						</div>
 					</div>
