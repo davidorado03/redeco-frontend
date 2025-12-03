@@ -14,14 +14,16 @@ def require_token(view_func):
     @wraps(view_func)
     def _wrapped(request, *args, **kwargs):
         token = request.session.get('redeco_token')
+        # TEMPORARY: Auto-inject dummy token while API is down
         if not token:
-            # Save a message to show on the login page and redirect there.
-            # Previously this redirected to `index` which is now the protected
-            # dashboard; that caused a redirect loop when index required a token.
-            request.session['login_required_message'] = (
-                'Debes iniciar sesión antes de acceder a esta página.'
-            )
-            return redirect('redeco_frontend:login')
+            request.session['redeco_token'] = 'DUMMY_TOKEN_TEMP'
+            token = 'DUMMY_TOKEN_TEMP'
+        # Original code commented out while API is unavailable
+        # if not token:
+        #     request.session['login_required_message'] = (
+        #         'Debes iniciar sesión antes de acceder a esta página.'
+        #     )
+        #     return redirect('redeco_frontend:login')
         return view_func(request, *args, **kwargs)
 
     return _wrapped
