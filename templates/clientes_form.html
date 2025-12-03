@@ -60,15 +60,41 @@
 
 						<!-- Datos geográficos -->
 						<div class="col-md-6 mb-3">
-							<label class="form-label">Entidad Federativa <span class="text-danger">*</span></label>
+							<label class="form-label">Estado <span class="text-danger">*</span></label>
 							<select id="estado_select" name="estado_id" class="form-control" required>
 								<option value="">-- Seleccione --</option>
-								{% for e in estados %}
-								<option value="{{ e.claveEdo }}" data-nombre="{{ e.estado }}" 
-										{% if edit_mode and cliente.estado_id == e.claveEdo %}selected{% elif form.estado_id == e.claveEdo|stringformat:"s" %}selected{% endif %}>
-									{{ e.estado }}
-								</option>
-								{% endfor %}
+								<option value="1" data-nombre="Aguascalientes" {% if edit_mode and cliente.estado_id == 1 %}selected{% elif form.estado_id == '1' %}selected{% endif %}>Aguascalientes</option>
+								<option value="2" data-nombre="Baja California" {% if edit_mode and cliente.estado_id == 2 %}selected{% elif form.estado_id == '2' %}selected{% endif %}>Baja California</option>
+								<option value="3" data-nombre="Baja California Sur" {% if edit_mode and cliente.estado_id == 3 %}selected{% elif form.estado_id == '3' %}selected{% endif %}>Baja California Sur</option>
+								<option value="4" data-nombre="Campeche" {% if edit_mode and cliente.estado_id == 4 %}selected{% elif form.estado_id == '4' %}selected{% endif %}>Campeche</option>
+								<option value="5" data-nombre="Coahuila de Zaragoza" {% if edit_mode and cliente.estado_id == 5 %}selected{% elif form.estado_id == '5' %}selected{% endif %}>Coahuila de Zaragoza</option>
+								<option value="6" data-nombre="Colima" {% if edit_mode and cliente.estado_id == 6 %}selected{% elif form.estado_id == '6' %}selected{% endif %}>Colima</option>
+								<option value="7" data-nombre="Chiapas" {% if edit_mode and cliente.estado_id == 7 %}selected{% elif form.estado_id == '7' %}selected{% endif %}>Chiapas</option>
+								<option value="8" data-nombre="Chihuahua" {% if edit_mode and cliente.estado_id == 8 %}selected{% elif form.estado_id == '8' %}selected{% endif %}>Chihuahua</option>
+								<option value="9" data-nombre="Ciudad de México" {% if edit_mode and cliente.estado_id == 9 %}selected{% elif form.estado_id == '9' %}selected{% endif %}>Ciudad de México</option>
+								<option value="10" data-nombre="Durango" {% if edit_mode and cliente.estado_id == 10 %}selected{% elif form.estado_id == '10' %}selected{% endif %}>Durango</option>
+								<option value="11" data-nombre="Guanajuato" {% if edit_mode and cliente.estado_id == 11 %}selected{% elif form.estado_id == '11' %}selected{% endif %}>Guanajuato</option>
+								<option value="12" data-nombre="Guerrero" {% if edit_mode and cliente.estado_id == 12 %}selected{% elif form.estado_id == '12' %}selected{% endif %}>Guerrero</option>
+								<option value="13" data-nombre="Hidalgo" {% if edit_mode and cliente.estado_id == 13 %}selected{% elif form.estado_id == '13' %}selected{% endif %}>Hidalgo</option>
+								<option value="14" data-nombre="Jalisco" {% if edit_mode and cliente.estado_id == 14 %}selected{% elif form.estado_id == '14' %}selected{% endif %}>Jalisco</option>
+								<option value="15" data-nombre="México" {% if edit_mode and cliente.estado_id == 15 %}selected{% elif form.estado_id == '15' %}selected{% endif %}>México</option>
+								<option value="16" data-nombre="Michoacán de Ocampo" {% if edit_mode and cliente.estado_id == 16 %}selected{% elif form.estado_id == '16' %}selected{% endif %}>Michoacán de Ocampo</option>
+								<option value="17" data-nombre="Morelos" {% if edit_mode and cliente.estado_id == 17 %}selected{% elif form.estado_id == '17' %}selected{% endif %}>Morelos</option>
+								<option value="18" data-nombre="Nayarit" {% if edit_mode and cliente.estado_id == 18 %}selected{% elif form.estado_id == '18' %}selected{% endif %}>Nayarit</option>
+								<option value="19" data-nombre="Nuevo León" {% if edit_mode and cliente.estado_id == 19 %}selected{% elif form.estado_id == '19' %}selected{% endif %}>Nuevo León</option>
+								<option value="20" data-nombre="Oaxaca" {% if edit_mode and cliente.estado_id == 20 %}selected{% elif form.estado_id == '20' %}selected{% endif %}>Oaxaca</option>
+								<option value="21" data-nombre="Puebla" {% if edit_mode and cliente.estado_id == 21 %}selected{% elif form.estado_id == '21' %}selected{% endif %}>Puebla</option>
+								<option value="22" data-nombre="Querétaro" {% if edit_mode and cliente.estado_id == 22 %}selected{% elif form.estado_id == '22' %}selected{% endif %}>Querétaro</option>
+								<option value="23" data-nombre="Quintana Roo" {% if edit_mode and cliente.estado_id == 23 %}selected{% elif form.estado_id == '23' %}selected{% endif %}>Quintana Roo</option>
+								<option value="24" data-nombre="San Luis Potosí" {% if edit_mode and cliente.estado_id == 24 %}selected{% elif form.estado_id == '24' %}selected{% endif %}>San Luis Potosí</option>
+								<option value="25" data-nombre="Sinaloa" {% if edit_mode and cliente.estado_id == 25 %}selected{% elif form.estado_id == '25' %}selected{% endif %}>Sinaloa</option>
+								<option value="26" data-nombre="Sonora" {% if edit_mode and cliente.estado_id == 26 %}selected{% elif form.estado_id == '26' %}selected{% endif %}>Sonora</option>
+								<option value="27" data-nombre="Tabasco" {% if edit_mode and cliente.estado_id == 27 %}selected{% elif form.estado_id == '27' %}selected{% endif %}>Tabasco</option>
+								<option value="28" data-nombre="Tamaulipas" {% if edit_mode and cliente.estado_id == 28 %}selected{% elif form.estado_id == '28' %}selected{% endif %}>Tamaulipas</option>
+								<option value="29" data-nombre="Tlaxcala" {% if edit_mode and cliente.estado_id == 29 %}selected{% elif form.estado_id == '29' %}selected{% endif %}>Tlaxcala</option>
+								<option value="30" data-nombre="Veracruz de Ignacio de la Llave" {% if edit_mode and cliente.estado_id == 30 %}selected{% elif form.estado_id == '30' %}selected{% endif %}>Veracruz de Ignacio de la Llave</option>
+								<option value="31" data-nombre="Yucatán" {% if edit_mode and cliente.estado_id == 31 %}selected{% elif form.estado_id == '31' %}selected{% endif %}>Yucatán</option>
+								<option value="32" data-nombre="Zacatecas" {% if edit_mode and cliente.estado_id == 32 %}selected{% elif form.estado_id == '32' %}selected{% endif %}>Zacatecas</option>
 							</select>
 							<input type="hidden" name="estado_nombre" id="estado_nombre" 
 								value="{% if edit_mode %}{{ cliente.estado_nombre }}{% else %}{{ form.estado_nombre }}{% endif %}" />
